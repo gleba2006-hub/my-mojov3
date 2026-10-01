@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AuthShell, FormError } from "@/components/auth-shell";
+import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
+import { FormError } from "@/components/auth-shell";
 import { ConnectChild } from "@/components/connect-child";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   createInviteCode,
   decideJoinRequest,
@@ -11,164 +14,334 @@ import {
   listJoinRequests,
   type MyContext,
 } from "@/lib/family.functions";
+import {
+  addCustomTask,
+  approveTask,
+  createGoal,
+  getBoard,
+  listRanges,
+  markPaid,
+  saveAllowance,
+  sendNote,
+} from "@/lib/mojo.functions";
+import { listMethods } from "@/methods/registry";
 import { RequireAuth, signOut } from "@/lib/session";
 
 export const Route = createFileRoute("/parent")({
-  head: () => ({ meta: [{ title: "המשפחה שלי — MyMojo" }] }),
+  head: () => ({ meta: [{ title: "המשפחה — MyMojo" }] }),
   component: () => <RequireAuth allow={["parent"]}>{(me) => <ParentHome me={me} />}</RequireAuth>,
 });
 
 function ParentHome({ me }: { me: MyContext }) {
-  const familyId = me.family!.id;
+  const [tab, setTab] = useState("home");
   const children = useQuery({ queryKey: ["children"], queryFn: () => listChildren() });
-  const [connecting, setConnecting] = useState<string | null>(null);
-  const active = children.data?.find((c) => c.id === connecting);
-
   return (
-    <AuthShell
-      title={me.family!.name}
-      subtitle="מסך הבית של ההורה (המשך בנייה בשלבים הבאים)"
-      className="max-w-lg"
+    <AppFrame
+      title={me.family?.name || "המשפחה"}
+      kicker="לוח הורה"
+      tab={tab}
+      onTab={setTab}
+      onSignOut={() => signOut()}
+      tabs={[
+        { id: "home", label: "בית" },
+        { id: "approve", label: "אישורים" },
+        { id: "goal", label: "מטרה" },
+        { id: "family", label: "משפחה" },
+      ]}
     >
-      <div className="flex flex-col gap-8">
-        <section aria-labelledby="kids-title" className="flex flex-col gap-3">
-          <h2 id="kids-title" className="text-lg font-black">
-            הילדים
-          </h2>
-          {active ? (
-            <div className="flex flex-col gap-4">
-              <ConnectChild childId={active.id} childName={active.name} />
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setConnecting(null)}
-                className="h-11 font-bold"
-              >
-                חזרה
-              </Button>
-            </div>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {(children.data ?? []).map((c) => (
-                <li
-                  key={c.id}
-                  className="flex items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3"
-                >
-                  <span className="font-bold">{c.name}</span>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setConnecting(c.id)}
-                    className="tap-target"
-                  >
-                    {c.connected ? "חיבור מכשיר נוסף" : "חיבור מכשיר"}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <InviteSection familyId={familyId} />
-        <JoinRequests familyId={familyId} />
-
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => signOut()}
-          className="h-11 font-bold"
-        >
-          יציאה
-        </Button>
-      </div>
-    </AuthShell>
+      {tab === "home" ? <Kids children={children.data ?? []} /> : null}
+      {tab === "approve" ? <Approvals children={children.data ?? []} /> : null}
+      {tab === "goal" ? <GoalMaker children={children.data ?? []} /> : null}
+      {tab === "family" ? <FamilyTab familyId={me.family!.id} children={children.data ?? []} /> : null}
+    </AppFrame>
   );
 }
 
-function InviteSection({ familyId }: { familyId: string }) {
-  const invite = useMutation({ mutationFn: () => createInviteCode({ data: { familyId } }) });
+function Kids({ children }: { children: Array<{ id: string; name: string; connected: boolean }> }) {
+  if (children.length === 0) return <Empty text="עוד אין ילדים. מוסיפים בטאב משפחה." />;
   return (
-    <section aria-labelledby="invite-title" className="flex flex-col gap-3">
-      <h2 id="invite-title" className="text-lg font-black">
-        הורה נוסף
-      </h2>
-      <p className="text-sm text-muted-foreground">
-        ההורה השני נרשם, בוחר &quot;הצטרפות עם קוד הזמנה&quot; ומקליד את הקוד. אתם תאשרו את הבקשה
-        כאן.
-      </p>
-      <FormError message={invite.error instanceof Error ? invite.error.message : null} />
-      {invite.data ? (
-        <p
-          dir="ltr"
-          className="select-all rounded-2xl bg-muted py-3 text-center text-3xl font-black tracking-[0.25em]"
-        >
-          {invite.data.code}
-        </p>
-      ) : null}
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => invite.mutate()}
-        disabled={invite.isPending}
-        className="h-11 font-bold"
-      >
-        {invite.data ? "קוד הזמנה חדש" : "יצירת קוד הזמנה"}
-      </Button>
-    </section>
+    <div className="flex flex-col gap-3">
+      {children.map((child) => (
+        <KidCard key={child.id} child={child} />
+      ))}
+    </div>
   );
 }
 
-function JoinRequests({ familyId }: { familyId: string }) {
+function KidCard({ child }: { child: { id: string; name: string; connected: boolean } }) {
+  const board = useQuery({ queryKey: ["board", child.id], queryFn: () => getBoard({ data: { childId: child.id } }) });
+  const goal = board.data?.goals.find((g) => g.status === "active");
+  const done = (board.data?.tasks ?? []).filter((t) => t.advances_goal && t.status === "approved").length;
+  const target = Number((goal?.method_config as { taskTarget?: number } | null)?.taskTarget ?? 0);
+  return (
+    <article className="surface-card p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-black">{child.name}</h2>
+          <p className="text-sm text-muted-foreground">
+            {child.connected ? "מכשיר מחובר" : "עוד בלי מכשיר"} · שלב דמות {stageFor(board.data?.child.level ?? 1)}
+          </p>
+        </div>
+        <p className="text-sm font-black text-primary">{board.data ? `${board.data.balance} ₪` : ""}</p>
+      </div>
+      {board.data ? <XpMeter xp={board.data.child.xp} level={board.data.child.level} /> : null}
+      {goal ? (
+        <p className="mt-3 text-sm font-bold">
+          {goal.title}: {done}/{target || "?"} במסלול {(goal.method_config as { pathName?: string }).pathName ?? ""}
+        </p>
+      ) : (
+        <p className="mt-3 text-sm text-muted-foreground">אין מטרה פעילה</p>
+      )}
+    </article>
+  );
+}
+
+function Approvals({ children }: { children: Array<{ id: string; name: string }> }) {
   const qc = useQueryClient();
-  const requests = useQuery({
-    queryKey: ["join-requests", familyId],
-    queryFn: () => listJoinRequests({ data: { familyId } }),
-    refetchInterval: 15_000,
+  const boards = useQuery({
+    queryKey: ["approvals", children.map((c) => c.id).join(",")],
+    enabled: children.length > 0,
+    queryFn: async () => {
+      const all = await Promise.all(children.map(async (c) => ({ child: c, board: await getBoard({ data: { childId: c.id } }) })));
+      return all.flatMap(({ child, board }) =>
+        board.tasks.filter((t) => t.status === "pending_approval").map((t) => ({ ...t, childName: child.name })),
+      );
+    },
   });
+  const decide = useMutation({
+    mutationFn: (v: { taskId: string; approve: boolean }) => approveTask({ data: v }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["approvals"] });
+      qc.invalidateQueries({ queryKey: ["board"] });
+    },
+  });
+  const rows = boards.data ?? [];
+  if (rows.length === 0) return <Empty text="אין משימות שמחכות לאישור." />;
+  return (
+    <ul className="flex flex-col gap-3">
+      {rows.map((task) => (
+        <li key={task.id} className="surface-card p-4">
+          <p className="font-black">{task.title}</p>
+          <p className="text-sm text-muted-foreground">
+            {task.childName} · {task.kind === "action" ? "אקשן" : "בית"} · {task.repeat_done}/{task.repeat_target}
+          </p>
+          <div className="mt-3 flex gap-2">
+            <Button type="button" className="tap-target" disabled={decide.isPending} onClick={() => decide.mutate({ taskId: task.id, approve: true })}>
+              אישור
+            </Button>
+            <Button type="button" variant="outline" className="tap-target" disabled={decide.isPending} onClick={() => decide.mutate({ taskId: task.id, approve: false })}>
+              החזרה
+            </Button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function GoalMaker({ children }: { children: Array<{ id: string; name: string }> }) {
+  const qc = useQueryClient();
+  const ranges = useQuery({ queryKey: ["ranges"], queryFn: () => listRanges() });
+  const [childId, setChildId] = useState(children[0]?.id ?? "");
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("350");
+  const [methodId, setMethodId] = useState<"tracks" | "classic" | "pocket_money">("tracks");
+  const [pathIndex, setPathIndex] = useState(1);
+  const [custom, setCustom] = useState("");
+  const create = useMutation({
+    mutationFn: () =>
+      createGoal({
+        data: { childId, title, priceIls: Number(price), methodId, pathIndex },
+      }),
+    onSuccess: () => {
+      setTitle("");
+      qc.invalidateQueries({ queryKey: ["board"] });
+    },
+  });
+  const board = useQuery({
+    queryKey: ["board", childId],
+    enabled: !!childId,
+    queryFn: () => getBoard({ data: { childId } }),
+  });
+  const extra = useMutation({
+    mutationFn: () => addCustomTask({ data: { goalId: board.data?.goals[0]?.id ?? "", title: custom, kind: "action", repeats: 1 } }),
+    onSuccess: () => {
+      setCustom("");
+      qc.invalidateQueries({ queryKey: ["board"] });
+    },
+  });
+  const allowance = useMutation({
+    mutationFn: () =>
+      saveAllowance({
+        data: { childId, period: "weekly", baseAmount: 20, payoutDay: 1, homeAmount: 2, actionAmount: 5 },
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
+  });
+  const pay = useMutation({
+    mutationFn: () => markPaid({ data: { childId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
+  });
+  const note = useMutation({
+    mutationFn: (body: string) => sendNote({ data: { childId, body } }),
+  });
+  const methods = listMethods();
+  const priceNum = Number(price);
+  const range = (ranges.data?.ranges ?? []).find(
+    (r) => priceNum >= Number(r.min_ils) && (r.max_ils == null || priceNum <= Number(r.max_ils)),
+  );
+  const paths = (ranges.data?.paths ?? []).filter((p) => p.range_id === range?.id);
+
+  if (children.length === 0) return <Empty text="קודם מוסיפים ילד." />;
+  return (
+    <div className="flex flex-col gap-4">
+      <form
+        className="surface-card flex flex-col gap-3 p-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          create.mutate();
+        }}
+      >
+        <h2 className="text-lg font-black">מתנה חדשה</h2>
+        <FormError message={create.error instanceof Error ? create.error.message : null} />
+        <Label htmlFor="kid">ילד/ה</Label>
+        <select id="kid" value={childId} onChange={(e) => setChildId(e.target.value)} className="h-11 rounded-xl border border-input bg-background px-3">
+          {children.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+        <Label htmlFor="gift">שם המתנה</Label>
+        <Input id="gift" value={title} onChange={(e) => setTitle(e.target.value)} required className="h-11" />
+        <Label htmlFor="price">מחיר בשקלים</Label>
+        <Input id="price" inputMode="decimal" dir="ltr" value={price} onChange={(e) => setPrice(e.target.value)} className="h-11" />
+        <p className="text-sm text-muted-foreground">{range ? `${range.label} · ${range.task_count} משימות` : "מחוץ לטווחים"}</p>
+        <div className="flex flex-col gap-2">
+          {methods.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              aria-pressed={methodId === m.id}
+              onClick={() => setMethodId(m.id as typeof methodId)}
+              className={`rounded-2xl border px-3 py-3 text-start ${methodId === m.id ? "border-primary bg-primary/10" : "border-border"}`}
+            >
+              <span className="block font-black">{m.name}</span>
+              <span className="text-sm text-muted-foreground">{m.tagline}</span>
+            </button>
+          ))}
+        </div>
+        {methodId !== "pocket_money" ? (
+          <div className="grid grid-cols-1 gap-2">
+            {paths.map((p) => (
+              <button key={p.id} type="button" aria-pressed={pathIndex === p.path_index} onClick={() => setPathIndex(p.path_index)} className={`rounded-2xl border px-3 py-2 text-sm font-bold ${pathIndex === p.path_index ? "border-accent bg-accent/15" : "border-border"}`}>
+                {p.name}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        <Button type="submit" disabled={create.isPending || title.trim().length < 2} className="h-11 font-bold">
+          {create.isPending ? "יוצרים…" : "פתיחת מטרה"}
+        </Button>
+      </form>
+
+      <section className="surface-card flex flex-col gap-3 p-4">
+        <h2 className="text-lg font-black">דמי כיס</h2>
+        <p className="text-sm text-muted-foreground">ברירת מחדל לשינוי: 20 ₪ שבועי, 2 ₪ לבית, 5 ₪ לאקשן. חל קדימה בלבד.</p>
+        <p className="text-2xl font-black">{board.data?.balance ?? 0} ₪ בצנצנת</p>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={() => allowance.mutate()} disabled={allowance.isPending}>הפעלת דמי כיס</Button>
+          <Button type="button" onClick={() => pay.mutate()} disabled={pay.isPending}>סמן כשולם</Button>
+        </div>
+        <FormError message={pay.error instanceof Error ? pay.error.message : null} />
+      </section>
+
+      {board.data?.goals[0] ? (
+        <form
+          className="surface-card flex flex-col gap-2 p-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            extra.mutate();
+          }}
+        >
+          <h2 className="font-black">משימה ידנית למטרה הפעילה</h2>
+          <Input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="שם המשימה" />
+          <Button type="submit" variant="outline" disabled={extra.isPending || custom.trim().length < 2}>הוספה</Button>
+        </form>
+      ) : null}
+
+      <form
+        className="surface-card flex flex-col gap-2 p-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const body = new FormData(e.currentTarget).get("note");
+          if (typeof body === "string" && body.trim()) note.mutate(body.trim());
+          e.currentTarget.reset();
+        }}
+      >
+        <Label htmlFor="note">פתק לילד</Label>
+        <Input id="note" name="note" maxLength={280} />
+        <Button type="submit" variant="secondary">שליחה</Button>
+      </form>
+    </div>
+  );
+}
+
+function FamilyTab({
+  familyId,
+  children,
+}: {
+  familyId: string;
+  children: Array<{ id: string; name: string; connected: boolean }>;
+}) {
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const active = children.find((c) => c.id === connecting);
+  const invite = useMutation({ mutationFn: () => createInviteCode({ data: { familyId } }) });
+  const qc = useQueryClient();
+  const requests = useQuery({ queryKey: ["join-requests", familyId], queryFn: () => listJoinRequests({ data: { familyId } }) });
   const decide = useMutation({
     mutationFn: (v: { memberId: string; approve: boolean }) => decideJoinRequest({ data: v }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["join-requests", familyId] }),
   });
-
-  if (!requests.data || requests.data.length === 0) return null;
+  if (active) {
+    return (
+      <div className="surface-card p-4">
+        <ConnectChild childId={active.id} childName={active.name} />
+        <Button type="button" className="mt-3 w-full" onClick={() => setConnecting(null)}>חזרה</Button>
+      </div>
+    );
+  }
   return (
-    <section aria-labelledby="requests-title" className="flex flex-col gap-3">
-      <h2 id="requests-title" className="text-lg font-black">
-        בקשות הצטרפות
-      </h2>
-      <FormError message={decide.error instanceof Error ? decide.error.message : null} />
+    <div className="flex flex-col gap-4">
       <ul className="flex flex-col gap-2">
-        {requests.data.map((r) => (
-          <li
-            key={r.id}
-            className="flex items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3"
-          >
-            <span className="font-bold">{r.name}</span>
-            <span className="flex gap-2">
-              <Button
-                type="button"
-                size="sm"
-                disabled={decide.isPending}
-                onClick={() => decide.mutate({ memberId: r.id, approve: true })}
-                className="tap-target"
-              >
-                אישור
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={decide.isPending}
-                onClick={() => decide.mutate({ memberId: r.id, approve: false })}
-                className="tap-target"
-              >
-                דחייה
-              </Button>
-            </span>
+        {children.map((c) => (
+          <li key={c.id} className="surface-card flex items-center justify-between px-4 py-3">
+            <span className="font-bold">{c.name}</span>
+            <Button type="button" size="sm" variant="outline" onClick={() => setConnecting(c.id)}>
+              {c.connected ? "מכשיר נוסף" : "חיבור"}
+            </Button>
           </li>
         ))}
       </ul>
-    </section>
+      <section className="surface-card p-4">
+        <h2 className="font-black">הורה נוסף</h2>
+        {invite.data ? <p dir="ltr" className="my-2 text-center text-2xl font-black tracking-[0.2em]">{invite.data.code}</p> : null}
+        <Button type="button" variant="outline" onClick={() => invite.mutate()}>{invite.data ? "קוד חדש" : "יצירת קוד"}</Button>
+      </section>
+      {(requests.data ?? []).length > 0 ? (
+        <ul className="flex flex-col gap-2">
+          {requests.data!.map((r) => (
+            <li key={r.id} className="surface-card flex items-center justify-between px-4 py-3">
+              <span className="font-bold">{r.name}</span>
+              <span className="flex gap-2">
+                <Button type="button" size="sm" onClick={() => decide.mutate({ memberId: r.id, approve: true })}>אישור</Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => decide.mutate({ memberId: r.id, approve: false })}>דחייה</Button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
+}
+
+function Empty({ text }: { text: string }) {
+  return <p className="surface-card p-6 text-center text-sm text-muted-foreground">{text}</p>;
 }

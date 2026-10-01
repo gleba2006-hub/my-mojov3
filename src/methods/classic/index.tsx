@@ -18,7 +18,7 @@ export const classicMethod: EducationMethod = {
     xp: ctx.taskXpValue,
     goalProgress: 1,
   }),
-  ParentSetupScreen: makePlaceholderScreen("הגדרת השיטה — בשלב 4"),
-  ParentDashboardWidget: makePlaceholderScreen("התקדמות למטרה — בשלב 4"),
-  ChildProgressWidget: makePlaceholderScreen("המטרה שלי — בשלב 4"),
+  ParentSetupScreen: makePlaceholderScreen("כל משימה בטווח סופרת למתנה"),
+  ParentDashboardWidget: makePlaceholderScreen("ההתקדמות מופיעה בכרטיס הילד"),
+  ChildProgressWidget: makePlaceholderScreen("המטרה מופיעה בלוח הילד"),
 };

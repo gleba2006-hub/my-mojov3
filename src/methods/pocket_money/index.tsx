@@ -28,7 +28,7 @@ export const pocketMoneyMethod: EducationMethod = {
       ledger: amount > 0 ? [{ amount, type: "earn", reason: "משימה מאושרת" }] : [],
     };
   },
-  ParentSetupScreen: makePlaceholderScreen("הגדרת דמי כיס — בשלב 5"),
-  ParentDashboardWidget: makePlaceholderScreen("יתרה ותשלום — בשלב 5"),
-  ChildProgressWidget: makePlaceholderScreen("הצנצנת שלי — בשלב 5"),
+  ParentSetupScreen: makePlaceholderScreen("סכומים נקבעים בלוח ההורה וחלים קדימה"),
+  ParentDashboardWidget: makePlaceholderScreen("היתרה והתשלום בלוח ההורה"),
+  ChildProgressWidget: makePlaceholderScreen("הצנצנת מופיעה בלוח הילד"),
 };

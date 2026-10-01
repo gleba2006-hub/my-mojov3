@@ -19,7 +19,7 @@ export const tracksMethod: EducationMethod = {
     xp: ctx.taskXpValue,
     goalProgress: ctx.taskKind === "action" ? 1 : 0,
   }),
-  ParentSetupScreen: makePlaceholderScreen("הגדרת מסלול אקשן — בשלב 3"),
-  ParentDashboardWidget: makePlaceholderScreen("התקדמות במסלול — בשלב 3"),
-  ChildProgressWidget: makePlaceholderScreen("המסלול שלי — בשלב 3"),
+  ParentSetupScreen: makePlaceholderScreen("בחירת טווח ומסלול נעשית בלוח ההורה"),
+  ParentDashboardWidget: makePlaceholderScreen("ההתקדמות מופיעה בכרטיס הילד"),
+  ChildProgressWidget: makePlaceholderScreen("המסלול מופיע בלוח הילד"),
 };
