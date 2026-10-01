@@ -240,7 +240,7 @@ function Approvals({ children }: { children: Array<{ id: string; name: string }>
       const all = await Promise.all(children.map(async (c) => ({ child: c, board: await getBoard({ data: { childId: c.id } }) })));
       return all.flatMap(({ child, board }) => [
         ...board.tasks.filter((t) => t.status === "pending_approval").map((t) => ({ ...t, childName: child.name, shop: false })),
-        ...board.messages.filter((m) => m.body.startsWith("בקשת חנות")).map((m) => ({ id: m.id, title: m.body, childName: child.name, kind: "home", repeat_done: 0, repeat_target: 1, shop: true })),
+        ...board.messages.filter((m) => m.body.startsWith("בקשת חנות")).map((m) => ({ id: m.id, title: m.body, childName: child.name, kind: "home", repeat_done: 0, repeat_target: 1, advances_goal: false, shop: true })),
       ]);
     },
   });
@@ -263,7 +263,7 @@ function Approvals({ children }: { children: Array<{ id: string; name: string }>
         <li key={task.id} className="surface-card p-4">
           <p className="font-black">{task.title}</p>
           <p className="text-sm text-muted-foreground">
-            {task.childName} · {task.shop ? "חנות" : ("advances_goal" in task && task.advances_goal) ? "סופר למתנה" : "רק נקודות"} · {task.repeat_done}/{task.repeat_target}
+            {task.childName} · {task.shop ? "חנות" : task.advances_goal ? "סופר למתנה" : "רק נקודות"} · {task.repeat_done}/{task.repeat_target}
           </p>
           <div className="mt-3 flex gap-2">
             {task.shop ? (
