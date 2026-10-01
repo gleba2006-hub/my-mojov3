@@ -135,9 +135,13 @@ function ChildHome({ me }: { me: MyContext }) {
       ) : null}
       {data && tab === "tasks" ? (
         <>
+          {open.length + waiting.length + closed.length === 0 ? (
+            <p className="surface-card p-4 text-center font-black">עוד אין משימות. ההורה פותח מתנה, והן מופיעות כאן.</p>
+          ) : null}
           <TaskList title="היום" tasks={open} action={(id) => done.mutate(id)} busy={done.isPending} />
           <TaskList title="מחכה להורה" tasks={waiting} />
           <TaskList title="נסגרו" tasks={closed} />
+          {open.length === 0 && waiting.length > 0 ? <p className="text-center text-sm font-bold">הכול אצל ההורה לאישור.</p> : null}
         </>
       ) : null}
       {data && tab === "prize" ? (
@@ -172,6 +176,7 @@ function ShopGrid({ coins, busy, onBuy, note }: { coins: number; busy: boolean; 
   return (
     <section className="flex flex-col gap-3">
       <p className="text-3xl font-black">{coins} מטבעות</p>
+      <p className="text-sm text-muted-foreground">מטבע מגיע מאישור משימה. הבקשה מחכה להורה, ולא יורדת לבד.</p>
       {note ? <p className="text-sm font-bold">{note}</p> : null}
       <ul className="grid grid-cols-2 gap-2">
         {shopItems.map((item) => (
