@@ -35,6 +35,7 @@ import { AvatarPlate } from "@/components/avatar-plate";
 import { parentVideos } from "@/components/brand";
 import { Chip, ChipRow, Hero, Jar } from "@/components/mojo-ui";
 import { MethodGuide } from "@/components/method-guide";
+import { plan } from "@/lib/plan";
 import { endDemo } from "@/lib/demo";
 import { listMethods } from "@/methods/registry";
 import { RequireAuth, signOut } from "@/lib/session";
@@ -95,6 +96,10 @@ function ParentHome({ me }: { me: MyContext }) {
         <>
           <Shop children={children.data ?? []} />
           <FamilyTab familyId={me.family!.id} children={children.data ?? []} />
+          <section className="surface-card p-4">
+            <h2 className="font-black">{plan.live ? `${plan.priceIls} ₪ ל${plan.period}` : "חינם כרגע"}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{plan.note}</p>
+          </section>
           <MethodGuide />
           <section className="surface-card p-4">
             <h2 className="mb-2 font-black">סרטוני הסבר</h2>

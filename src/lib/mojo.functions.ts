@@ -117,6 +117,8 @@ export const createGoal = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error || !goal) throw new Error("לא הצלחנו ליצור את המטרה");
+    await db.from("goals").update({ status: "cancelled" }).eq("child_id", child.id).eq("status", "active").neq("id", goal.id);
+    await db.from("tasks").update({ status: "archived" }).eq("child_id", child.id).eq("status", "active").neq("goal_id", goal.id);
 
     const byId = new Map((catalog ?? []).map((t) => [t.id, t]));
     const rows = (links ?? [])

@@ -4,6 +4,7 @@ import { AppFrame } from "@/components/app-frame";
 import { Button } from "@/components/ui/button";
 import { adminSnapshot, listRanges, setMethodEnabled } from "@/lib/mojo.functions";
 import { MethodGuide } from "@/components/method-guide";
+import { plan } from "@/lib/plan";
 import { RequireAuth, signOut } from "@/lib/session";
 
 export const Route = createFileRoute("/admin")({
@@ -81,8 +82,8 @@ function AdminHome() {
             </ul>
           </section>
           <section className="surface-card p-4">
-            <h2 className="font-black">שלב 7 · מנויים</h2>
-            <p className="mt-1 text-sm text-muted-foreground">הטבלה קיימת. Stripe יחובר אחרי שמות התוכניות, המחירים, ומה נשאר חינמי.</p>
+            <h2 className="font-black">שלב 7 · {plan.name}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{plan.note} אין חסימת פיצ׳רים.</p>
           </section>
         </>
       ) : (
