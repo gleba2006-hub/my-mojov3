@@ -252,7 +252,9 @@ export const requestShop = createServerFn({ method: "POST" })
     const db = await admin();
     const { data: me } = await db.from("child_profiles").select("id, family_id, name, xp").eq("user_id", context.userId).maybeSingle();
     if (!me) throw new Error("רק ילד יכול לבקש מהחנות");
-    if (Math.floor(me.xp / 10) < data.cost) throw new Error("אין מספיק מטבעות");
+    const { data: wallet } = await db.from("coin_wallets").select("balance").eq("child_id", me.id).maybeSingle();
+    const coins = Number(wallet?.balance ?? Math.floor(me.xp / 10));
+    if (coins < data.cost) throw new Error("אין מספיק מטבעות");
     await db.from("messages").insert({
       family_id: me.family_id,
       child_id: me.id,
@@ -602,4 +604,12 @@ export const setMethodEnabled = createServerFn({ method: "POST" })
     if (!role) throw new Error("אין הרשאה");
     await db.from("education_methods").update({ enabled: data.enabled }).eq("id", data.id);
     return { ok: true };
+  });
+
+export const listLiveMethods = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const db = await admin();
+    const { data } = await db.from("education_methods").select("id, enabled").eq("enabled", true);
+    return { ids: (data ?? []).map((row) => row.id) };
   });

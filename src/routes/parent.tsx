@@ -30,6 +30,7 @@ import {
   saveAllowance,
   sendNote,
   setRepeats,
+  listLiveMethods,
 } from "@/lib/mojo.functions";
 import { AvatarPlate } from "@/components/avatar-plate";
 import { parentVideos } from "@/components/brand";
@@ -60,7 +61,7 @@ function ParentHome({ me }: { me: MyContext }) {
     enabled: (children.data ?? []).length > 0,
     queryFn: async () => {
       const all = await Promise.all((children.data ?? []).map(async (c) => getBoard({ data: { childId: c.id } })));
-      return all.reduce((n, board) => n + board.tasks.filter((t) => t.status === "pending_approval").length, 0);
+      return all.reduce((n, board) => n + board.tasks.filter((t) => t.status === "pending_approval").length + board.messages.filter((m) => m.body.startsWith("בקשת חנות")).length, 0);
     },
   });
   return (
@@ -355,6 +356,8 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
     mutationFn: (body: string) => sendNote({ data: { childId, body } }),
   });
   const methods = listMethods();
+  const live = useQuery({ queryKey: ["live-methods"], queryFn: () => listLiveMethods() });
+  const shown = methods.filter((m) => !live.data?.ids.length || live.data.ids.includes(m.id));
   const priceNum = Number(price);
   const range = (ranges.data?.ranges ?? []).find(
     (r) => priceNum >= Number(r.min_ils) && (r.max_ils == null || priceNum <= Number(r.max_ils)),
@@ -375,7 +378,7 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
         <FormError message={create.error instanceof Error ? create.error.message : null} />
         {create.isSuccess ? <p className="rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold">המתנה נפתחה. הילד רואה אותה בלוח.</p> : null}
         <div className="flex flex-col gap-2">
-          {methods.map((m) => (
+          {shown.map((m) => (
             <button
               key={m.id}
               type="button"

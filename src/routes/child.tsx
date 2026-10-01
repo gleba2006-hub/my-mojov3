@@ -176,7 +176,7 @@ function ShopGrid({ coins, busy, onBuy, note }: { coins: number; busy: boolean; 
   return (
     <section className="flex flex-col gap-3">
       <p className="text-3xl font-black">{coins} מטבעות</p>
-      <p className="text-sm text-muted-foreground">מטבע מגיע מאישור משימה. הבקשה מחכה להורה, ולא יורדת לבד.</p>
+      <p className="text-sm text-muted-foreground">מטבע מגיע מאישור משימה. הבקשה מחכה להורה, והמטבעות יורדים רק אחרי אישור.</p>
       {note ? <p className="text-sm font-bold">{note}</p> : null}
       <ul className="grid grid-cols-2 gap-2">
         {shopItems.map((item) => (
