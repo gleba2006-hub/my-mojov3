@@ -138,6 +138,7 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
   return (
     <div className="flex flex-col gap-3">
       <section className="surface-card flex items-center gap-3 p-4">
+        <img src={face} alt="" className="h-24 w-24 object-contain" />
         <img src={petSrc(board.data?.child.pet_id)} alt="" className="h-14 w-14 object-contain" />
         <div>
           <p className="text-xl font-black">{child.name}</p>
