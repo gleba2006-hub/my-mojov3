@@ -79,6 +79,24 @@ export type Database = {
         }
         Relationships: []
       }
+      avatars: {
+        Row: {
+          id: string
+          name: string
+          stage1_path: string
+        }
+        Insert: {
+          id: string
+          name: string
+          stage1_path: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          stage1_path?: string
+        }
+        Relationships: []
+      }
       child_allowances: {
         Row: {
           action_amount: number
@@ -193,6 +211,64 @@ export type Database = {
           key_hash?: string
         }
         Relationships: []
+      }
+      coin_ledger: {
+        Row: {
+          amount: number
+          child_id: string
+          created_at: string
+          id: string
+          reason: string
+        }
+        Insert: {
+          amount: number
+          child_id: string
+          created_at?: string
+          id?: string
+          reason: string
+        }
+        Update: {
+          amount?: number
+          child_id?: string
+          created_at?: string
+          id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_ledger_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coin_wallets: {
+        Row: {
+          balance: number
+          child_id: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          child_id: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          child_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_wallets_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: true
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_categories: {
         Row: {
@@ -701,6 +777,38 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      streaks: {
+        Row: {
+          best_count: number
+          child_id: string
+          current_count: number
+          last_active_date: string | null
+          shield_count: number
+        }
+        Insert: {
+          best_count?: number
+          child_id: string
+          current_count?: number
+          last_active_date?: string | null
+          shield_count?: number
+        }
+        Update: {
+          best_count?: number
+          child_id?: string
+          current_count?: number
+          last_active_date?: string | null
+          shield_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streaks_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: true
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sub_tasks: {
         Row: {
