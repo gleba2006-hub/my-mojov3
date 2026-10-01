@@ -206,6 +206,27 @@ export const addCustomTask = createServerFn({ method: "POST" })
     return { taskId: task.id };
   });
 
+export const requestPrize = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ goalId: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    const db = await admin();
+    const { data: me } = await db.from("child_profiles").select("id, family_id, name").eq("user_id", context.userId).maybeSingle();
+    if (!me) throw new Error("רק ילד יכול לבקש את המתנה");
+    const { data: goal } = await db.from("goals").select("id, child_id, status, title, method_config").eq("id", data.goalId).maybeSingle();
+    if (!goal || goal.child_id !== me.id) throw new Error("המתנה לא שלך");
+    if (goal.status !== "completed") throw new Error("המתנה עוד לא הושגה");
+    const config = { ...(goal.method_config as Record<string, unknown>), requested: true };
+    await db.from("goals").update({ method_config: config }).eq("id", goal.id);
+    await db.from("messages").insert({
+      family_id: me.family_id,
+      child_id: me.id,
+      body: `${me.name} מבקש/ת את ${goal.title}`,
+      sender_user_id: context.userId,
+    });
+    return { ok: true };
+  });
+
 export const deliverGoal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ goalId: z.string().uuid() }))

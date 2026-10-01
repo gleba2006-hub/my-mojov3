@@ -186,10 +186,21 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
       qc.invalidateQueries({ queryKey: ["board"] });
     },
   });
+  const [base, setBase] = useState("20");
+  const [homePay, setHomePay] = useState("2");
+  const [actionPay, setActionPay] = useState("5");
+  const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
   const allowance = useMutation({
     mutationFn: () =>
       saveAllowance({
-        data: { childId, period: "weekly", baseAmount: 20, payoutDay: 1, homeAmount: 2, actionAmount: 5 },
+        data: {
+          childId,
+          period,
+          baseAmount: Number(base) || 0,
+          payoutDay: 1,
+          homeAmount: Number(homePay) || 0,
+          actionAmount: Number(actionPay) || 0,
+        },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
   });
@@ -260,10 +271,19 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
 
       <section className="surface-card flex flex-col gap-3 p-4">
         <h2 className="text-lg font-black">דמי כיס</h2>
-        <p className="text-sm text-muted-foreground">ברירת מחדל לשינוי: 20 ₪ שבועי, 2 ₪ לבית, 5 ₪ לאקשן. חל קדימה בלבד.</p>
         <p className="text-2xl font-black">{board.data?.balance ?? 0} ₪ בצנצנת</p>
+        <div className="grid grid-cols-2 gap-2">
+          <Input inputMode="decimal" dir="ltr" value={base} onChange={(e) => setBase(e.target.value)} aria-label="בסיס" />
+          <select value={period} onChange={(e) => setPeriod(e.target.value as typeof period)} className="h-11 rounded-xl border border-input bg-background px-3">
+            <option value="weekly">שבועי</option>
+            <option value="monthly">חודשי</option>
+          </select>
+          <Input inputMode="decimal" dir="ltr" value={homePay} onChange={(e) => setHomePay(e.target.value)} aria-label="בית" />
+          <Input inputMode="decimal" dir="ltr" value={actionPay} onChange={(e) => setActionPay(e.target.value)} aria-label="אקשן" />
+        </div>
+        <p className="text-xs text-muted-foreground">בסיס, תדירות, תשלום לבית, תשלום לאקשן. חל קדימה בלבד.</p>
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={() => allowance.mutate()} disabled={allowance.isPending}>הפעלת דמי כיס</Button>
+          <Button type="button" variant="outline" onClick={() => allowance.mutate()} disabled={allowance.isPending}>שמירה</Button>
           <Button type="button" onClick={() => pay.mutate()} disabled={pay.isPending}>סמן כשולם</Button>
         </div>
         <FormError message={pay.error instanceof Error ? pay.error.message : null} />
@@ -363,7 +383,7 @@ function Shop({ children }: { children: Array<{ id: string; name: string }> }) {
             </p>
             {goal.status === "completed" && !delivered ? (
               <Button type="button" className="mt-3" disabled={give.isPending} onClick={() => give.mutate(goal.id)}>
-                סמן כנמסר
+                {(goal.method_config as { requested?: boolean }).requested ? "הילד ביקש · סמן כנמסר" : "סמן כנמסר"}
               </Button>
             ) : null}
             {delivered ? <p className="mt-2 text-sm font-bold text-success-foreground">נמסר</p> : null}

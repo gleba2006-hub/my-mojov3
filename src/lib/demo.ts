@@ -17,7 +17,7 @@ export type DemoKid = {
   xp: number;
   pet: string;
   balance: number;
-  goal: { title: string; price: number; path: string; method: string; target: number };
+  goal: { title: string; price: number; path: string; method: string; target: number; requested?: boolean };
   tasks: DemoTask[];
   notes: string[];
 };
@@ -153,6 +153,16 @@ export function demoDecide(taskId: string, approve: boolean) {
     const current = read();
     if (current) write({ ...current, chest: task.title });
   }
+  emit();
+}
+
+export function demoRequest(childId: string) {
+  const kid = kids.find((k) => k.id === childId);
+  if (!kid) return;
+  const done = kid.tasks.filter((t) => t.advances_goal && t.status === "approved").length;
+  if (done < kid.goal.target) return;
+  kid.goal.requested = true;
+  kid.notes.unshift(`${kid.name} מבקש/ת את ${kid.goal.title}`);
   emit();
 }
 

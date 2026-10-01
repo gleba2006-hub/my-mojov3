@@ -8,6 +8,7 @@ import {
   demoDecide,
   demoKid,
   demoKids,
+  demoRequest,
   endDemo,
   setDemoView,
   type DemoTask,
@@ -131,6 +132,10 @@ export function DemoChild() {
         <div className="mt-2 h-3 overflow-hidden rounded-full bg-muted">
           <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, (done / kid.goal.target) * 100)}%` }} />
         </div>
+        {done >= kid.goal.target && !kid.goal.requested ? (
+          <Button type="button" className="mt-3" onClick={() => demoRequest(kid.id)}>לבקש מההורה</Button>
+        ) : null}
+        {kid.goal.requested ? <p className="mt-2 text-sm font-bold">ביקשת. מחכים להורה.</p> : null}
       </section>
       <section className="surface-card p-4">
         <h2 className="font-black">הצנצנת</h2>

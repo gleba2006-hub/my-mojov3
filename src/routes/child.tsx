@@ -4,7 +4,7 @@ import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
 import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
-import { completeTask, getBoard } from "@/lib/mojo.functions";
+import { completeTask, getBoard, requestPrize } from "@/lib/mojo.functions";
 import { DemoChild } from "@/components/demo-boards";
 import { useDemo } from "@/lib/use-demo";
 import { RequireAuth, signOut } from "@/lib/session";
@@ -26,6 +26,10 @@ function ChildHome({ me }: { me: MyContext }) {
   const board = useQuery({ queryKey: ["board", me.childId], queryFn: () => getBoard({ data: {} }) });
   const done = useMutation({
     mutationFn: (taskId: string) => completeTask({ data: { taskId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
+  });
+  const ask = useMutation({
+    mutationFn: (goalId: string) => requestPrize({ data: { goalId } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
   });
   const data = board.data;
@@ -59,6 +63,11 @@ function ChildHome({ me }: { me: MyContext }) {
                 <div className="h-full rounded-full bg-primary" style={{ width: `${target ? Math.min(100, (approved / target) * 100) : 0}%` }} />
               </div>
               {goal.status === "completed" ? <p className="mt-2 font-black text-success-foreground">המתנה הושגה</p> : null}
+              {goal.status === "completed" && !(goal.method_config as { requested?: boolean }).requested ? (
+                <Button type="button" className="mt-3" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש מההורה</Button>
+              ) : null}
+              {(goal.method_config as { requested?: boolean }).requested ? <p className="mt-2 text-sm font-bold">ביקשת. מחכים להורה.</p> : null}
+              {(goal.method_config as { delivered?: boolean }).delivered ? <p className="mt-2 text-sm font-bold text-success-foreground">המתנה נמסרה</p> : null}
             </section>
           ) : (
             <p className="surface-card p-4 text-sm text-muted-foreground">ההורה עוד לא פתח מטרה.</p>
