@@ -25,6 +25,12 @@ export type DemoKid = {
 const listeners = new Set<() => void>();
 
 function emit() {
+  // New snapshot object so subscribers re-render after in-place kid mutations.
+  if (session) {
+    session = { ...session };
+    lastRaw = typeof window !== "undefined" ? JSON.stringify(session) : null;
+    if (typeof window !== "undefined") sessionStorage.setItem("mymojo-demo", lastRaw!);
+  }
   listeners.forEach((fn) => fn());
 }
 
