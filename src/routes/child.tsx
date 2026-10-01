@@ -68,14 +68,11 @@ function ChildHome({ me }: { me: MyContext }) {
       {!data ? <p className="text-center text-sm text-muted-foreground">טוענים את הלוח…</p> : null}
       {data && tab === "today" ? (
         <>
-          <section className="relative min-h-[52dvh] overflow-hidden rounded-[28px]">
-            <img src="/brand/room-1.png" alt="" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="relative flex h-full flex-col justify-between p-4">
-              <div className="flex justify-between text-sm font-black text-primary-foreground">
-                <span className="rounded-full bg-foreground/50 px-3 py-1">רמה {data.child.level}</span>
-                <span className="rounded-full bg-foreground/50 px-3 py-1">{data.child.xp % 100}/100</span>
-              </div>
-              <img src={characterSrc(data.child.gender, stageFor(data.child.level))} alt="" className="mx-auto h-64 w-auto object-contain drop-shadow-xl" />
+          <section className="relative -mx-4 min-h-[68dvh]">
+            <img src={characterSrc(data.child.gender, stageFor(data.child.level))} alt="" className="absolute inset-x-0 bottom-8 mx-auto h-[46dvh] w-auto object-contain drop-shadow-2xl" />
+            <div className="absolute inset-x-4 top-0 flex justify-between">
+              <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רמה {data.child.level}</span>
+              <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">{data.child.xp % 100}/100</span>
             </div>
             <LevelUp level={data.child.level} name={data.child.name} />
           </section>

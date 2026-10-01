@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
-import { taskIcon } from "@/components/brand";
+import { characterSrc, taskIcon } from "@/components/brand";
 import { coinsFromXp, shopItems } from "@/lib/shop";
 import { Button } from "@/components/ui/button";
 import { Chip, ChipRow, Hero, Jar } from "@/components/mojo-ui";
@@ -127,12 +127,15 @@ export function DemoChild() {
       <DemoSwitch />
       {tab === "today" ? (
         <>
-          <section className="surface-card p-4">
-            <XpMeter xp={kid.xp} level={kid.level} />
-            <div className="mt-3"><AvatarPlate stage={stageFor(kid.level)} pet={kid.pet} gender={kid.gender} /></div>
+          <section className="relative -mx-4 min-h-[68dvh]">
+            <img src={characterSrc(kid.gender, stageFor(kid.level))} alt="" className="absolute inset-x-0 bottom-16 mx-auto h-[46dvh] w-auto object-contain drop-shadow-2xl" />
+            <div className="absolute inset-x-4 top-0 flex justify-between">
+              <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רמה {kid.level}</span>
+              <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">{kid.xp % 100}/100</span>
+            </div>
           </section>
-          <TaskBlock title="לעשות היום" tasks={open} onDone={demoComplete} />
-          <TaskBlock title="מחכה להורה" tasks={waiting} locked />
+          <Hero eyebrow={kid.goal.path} title={kid.goal.title} detail={`${done}/${kid.goal.target}`} progress={(done / kid.goal.target) * 100} />
+          <TaskBlock title="מחכה לך היום" tasks={open.slice(0, 2)} onDone={demoComplete} />
         </>
       ) : null}
       {tab === "tasks" ? (
