@@ -81,7 +81,7 @@ function ChildHome({ me }: { me: MyContext }) {
       {data && tab === "today" ? (
         <>
           <section className="relative -mx-4 min-h-[68dvh]">
-            <img src={characters.find((c) => c.id === data.child.avatar_id)?.src ?? characterSrc(data.child.gender, stageFor(data.child.level))} alt="" className="absolute inset-x-0 bottom-8 mx-auto h-[46dvh] w-auto object-contain drop-shadow-2xl" />
+            <img src={faceFor(data.child.avatar_id, data.child.gender, data.child.level)} alt="" className="absolute inset-x-0 bottom-8 mx-auto h-[46dvh] w-auto object-contain drop-shadow-2xl" />
             <img src={petSrc(data.child.pet_id)} alt="" className="absolute bottom-10 start-4 h-20 w-20 object-contain" />
             <div className="absolute inset-x-4 top-0 flex justify-between">
               <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רמה {data.child.level}</span>
@@ -148,6 +148,13 @@ function ChildHome({ me }: { me: MyContext }) {
       ) : null}
     </AppFrame>
   );
+}
+
+function faceFor(avatarId: string | null, gender: string | null, level: number) {
+  const stage = stageFor(level);
+  if (avatarId === "pinka") return `/brand/girl-pinka-${stage}.png`;
+  if (avatarId === "tree" || !avatarId) return characterSrc(gender, stage);
+  return characters.find((c) => c.id === avatarId)?.src ?? characterSrc(gender, stage);
 }
 
 function ShopGrid({ coins, busy, onBuy, note }: { coins: number; busy: boolean; onBuy: (item: { title: string; cost: number }) => void; note: string | null }) {

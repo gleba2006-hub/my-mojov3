@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
-import { characterSrc, characters } from "@/components/brand";
+import { characterSrc, characters, petSrc } from "@/components/brand";
 import { FormError } from "@/components/auth-shell";
 import { ConnectChild } from "@/components/connect-child";
 import { Button } from "@/components/ui/button";
@@ -138,7 +138,7 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
   return (
     <div className="flex flex-col gap-3">
       <section className="surface-card flex items-center gap-3 p-4">
-        <img src={face} alt="" className="h-24 w-24 object-contain" />
+        <img src={petSrc(board.data?.child.pet_id)} alt="" className="h-14 w-14 object-contain" />
         <div>
           <p className="text-xl font-black">{child.name}</p>
           <p className="text-sm font-bold">רמה {board.data?.child.level ?? 1} · שלב {stage}</p>
