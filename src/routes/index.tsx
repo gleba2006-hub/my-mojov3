@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { listMethods } from "@/methods/registry";
 
 export const Route = createFileRoute("/")({
@@ -35,15 +35,34 @@ function Index() {
             משימות שהופכות למתנות
           </h1>
           <p className="mt-3 text-base text-muted-foreground">
-            הורים מגדירים משימות ומטרות, הילדים משלימים, צוברים נקודות ניסיון
-            ומתקדמים צעד-צעד למתנה.
+            הורים מגדירים משימות ומטרות, הילדים משלימים, צוברים נקודות ניסיון ומתקדמים צעד-צעד
+            למתנה.
           </p>
         </header>
 
+        <nav aria-label="כניסה" className="mt-8 flex flex-col gap-3">
+          <Link
+            to="/register"
+            className="tap-target flex items-center justify-center rounded-2xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground shadow-[var(--shadow-pop)]"
+          >
+            הרשמה להורים
+          </Link>
+          <Link
+            to="/login"
+            className="tap-target flex items-center justify-center rounded-2xl border-2 border-primary px-4 py-3 text-base font-bold text-foreground"
+          >
+            כניסה
+          </Link>
+          <Link
+            to="/join"
+            className="tap-target flex items-center justify-center text-sm font-bold text-primary"
+          >
+            ילד/ה? חיבור עם קוד
+          </Link>
+        </nav>
+
         <section className="mt-10">
-          <h2 className="mb-3 text-lg font-bold text-foreground">
-            שלוש שיטות חינוכיות
-          </h2>
+          <h2 className="mb-3 text-lg font-bold text-foreground">שלוש שיטות חינוכיות</h2>
           <ul className="flex flex-col gap-3">
             {methods.map((method) => (
               <li key={method.id} className="surface-card p-4">
@@ -60,10 +79,10 @@ function Index() {
         </section>
 
         <section className="surface-card mt-8 p-4">
-          <h2 className="text-base font-bold text-foreground">שלב 1 הושלם</h2>
+          <h2 className="text-base font-bold text-foreground">שלב 2 הושלם</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            מסד הנתונים, כללי ההרשאות, חוקי הנקודות והשלד של השיטות מוכנים.
-            השלב הבא: כניסה, יצירת משפחה וחיבור ילד.
+            כניסה, יצירת משפחה, הוספת ילדים, חיבור מכשיר בקוד או QR והזמנת הורה שני. השלב הבא: שיטת
+            מסלולי האקשן.
           </p>
         </section>
       </div>

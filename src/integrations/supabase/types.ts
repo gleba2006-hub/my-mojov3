@@ -135,6 +135,27 @@ export type Database = {
           },
         ]
       }
+      code_attempts: {
+        Row: {
+          bucket: string
+          created_at: string
+          id: string
+          key_hash: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          id?: string
+          key_hash: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          id?: string
+          key_hash?: string
+        }
+        Relationships: []
+      }
       education_methods: {
         Row: {
           created_at: string
