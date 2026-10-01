@@ -503,11 +503,12 @@ function FamilyTab({
 }) {
   const [connecting, setConnecting] = useState<string | null>(null);
   const [name, setName] = useState("");
+  const [gender, setGender] = useState<"girl" | "boy">("girl");
   const active = children.find((c) => c.id === connecting);
   const invite = useMutation({ mutationFn: () => createInviteCode({ data: { familyId } }) });
   const qc = useQueryClient();
   const add = useMutation({
-    mutationFn: () => addChild({ data: { familyId, name, gender: "girl", birthYear: new Date().getFullYear() - 8 } }),
+    mutationFn: () => addChild({ data: { familyId, name, gender, birthYear: new Date().getFullYear() - 8 } }),
     onSuccess: async (res) => {
       setName("");
       await qc.invalidateQueries({ queryKey: ["children"] });
@@ -538,6 +539,10 @@ function FamilyTab({
       >
         <h2 className="font-black">ילד/ה חדש/ה</h2>
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="שם" />
+        <div className="grid grid-cols-2 gap-2">
+          <Button type="button" variant={gender === "girl" ? "default" : "outline"} onClick={() => setGender("girl")}>בת</Button>
+          <Button type="button" variant={gender === "boy" ? "default" : "outline"} onClick={() => setGender("boy")}>בן</Button>
+        </div>
         <Button type="submit" disabled={add.isPending || name.trim().length < 2}>הוספה וחיבור מכשיר</Button>
       </form>
       <ul className="flex flex-col gap-2">

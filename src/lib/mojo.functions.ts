@@ -223,6 +223,16 @@ export const cancelGoal = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setAvatar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ avatarId: z.string().min(2).max(20) }))
+  .handler(async ({ data, context }) => {
+    const db = await admin();
+    const me = await childOf(context.userId);
+    await db.from("child_profiles").update({ avatar_id: data.avatarId }).eq("id", me.id);
+    return { ok: true };
+  });
+
 export const requestShop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ title: z.string().min(2).max(40), cost: z.number().int().positive() }))
@@ -320,7 +330,7 @@ export const getBoard = createServerFn({ method: "GET" })
     if (!childId) childId = (await childOf(context.userId)).id;
     const { data: child } = await db
       .from("child_profiles")
-      .select("id, family_id, name, xp, level, gender, user_id")
+      .select("id, family_id, name, xp, level, gender, user_id, avatar_id")
       .eq("id", childId)
       .maybeSingle();
     if (!child) throw new Error("הילד לא נמצא");
