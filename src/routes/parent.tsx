@@ -27,6 +27,7 @@ import {
   setRepeats,
 } from "@/lib/mojo.functions";
 import { AvatarPlate } from "@/components/avatar-plate";
+import { DemoParent } from "@/components/demo-boards";
 import { useDemo } from "@/lib/use-demo";
 import { listMethods } from "@/methods/registry";
 import { RequireAuth, signOut } from "@/lib/session";
