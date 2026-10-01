@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
+import { AvatarPlate } from "@/components/avatar-plate";
 import { Button } from "@/components/ui/button";
 import {
   closeChest,
@@ -49,6 +50,9 @@ export function DemoParent() {
               <p className="font-black text-primary">{kid.balance} ₪</p>
             </div>
             <XpMeter xp={kid.xp} level={kid.level} />
+            <div className="mt-3">
+              <AvatarPlate stage={stageFor(kid.level)} pet={kid.pet} />
+            </div>
             <p className="mt-3 text-sm font-bold">
               {kid.goal.title} ({kid.goal.price} ₪) · {done}/{kid.goal.target} · {kid.goal.path}
             </p>
@@ -112,6 +116,9 @@ export function DemoChild() {
       <DemoBar />
       <section className="surface-card p-4">
         <p className="text-sm font-bold text-accent-foreground">שלב דמות {stageFor(kid.level)} · {kid.pet}</p>
+        <div className="mt-2">
+          <AvatarPlate stage={stageFor(kid.level)} pet={kid.pet} />
+        </div>
         <h2 className="text-xl font-black">{kid.gender === "boy" ? "גיבור הבית" : "גיבורת הבית"}</h2>
         <div className="mt-3">
           <XpMeter xp={kid.xp} level={kid.level} />

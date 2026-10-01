@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
+import { AvatarPlate } from "@/components/avatar-plate";
 import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
 import { completeTask, getBoard } from "@/lib/mojo.functions";
@@ -43,6 +44,9 @@ function ChildHome({ me }: { me: MyContext }) {
             <h2 className="text-xl font-black">{data.child.gender === "boy" ? "גיבור הבית" : "גיבורת הבית"}</h2>
             <div className="mt-3">
               <XpMeter xp={data.child.xp} level={data.child.level} />
+            </div>
+            <div className="mt-3">
+              <AvatarPlate stage={stageFor(data.child.level)} />
             </div>
             <LevelUp level={data.child.level} name={data.child.name} />
           </section>

@@ -24,8 +24,9 @@ import {
   markPaid,
   saveAllowance,
   sendNote,
+  setRepeats,
 } from "@/lib/mojo.functions";
-import { DemoParent } from "@/components/demo-boards";
+import { AvatarPlate } from "@/components/avatar-plate";
 import { useDemo } from "@/lib/use-demo";
 import { listMethods } from "@/methods/registry";
 import { RequireAuth, signOut } from "@/lib/session";
@@ -96,6 +97,9 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
         <p className="text-sm font-black text-primary">{board.data ? `${board.data.balance} ₪` : ""}</p>
       </div>
       {board.data ? <XpMeter xp={board.data.child.xp} level={board.data.child.level} /> : null}
+      <div className="mt-3">
+        <AvatarPlate stage={stageFor(board.data?.child.level ?? 1)} />
+      </div>
       {goal ? (
         <p className="mt-3 text-sm font-bold">
           {goal.title}: {done}/{target || "?"} במסלול {(goal.method_config as { pathName?: string }).pathName ?? ""}
@@ -278,6 +282,8 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
         </form>
       ) : null}
 
+      <TaskRepeats tasks={board.data?.tasks ?? []} />
+
       <form
         className="surface-card flex flex-col gap-2 p-4"
         onSubmit={(e) => {
@@ -292,6 +298,42 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
         <Button type="submit" variant="secondary">שליחה</Button>
       </form>
     </div>
+  );
+}
+
+function TaskRepeats({ tasks }: { tasks: Array<{ id: string; title: string; repeat_target: number; status: string }> }) {
+  const qc = useQueryClient();
+  const save = useMutation({
+    mutationFn: (v: { taskId: string; repeats: number }) => setRepeats({ data: v }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
+  });
+  const open = tasks.filter((t) => t.status !== "approved");
+  if (open.length === 0) return null;
+  return (
+    <section className="surface-card p-4">
+      <h2 className="mb-2 font-black">כמה פעמים עד שנסגר</h2>
+      <ul className="flex flex-col gap-2">
+        {open.map((task) => (
+          <li key={task.id} className="flex items-center justify-between gap-2">
+            <span className="text-sm font-bold">{task.title}</span>
+            <span className="flex gap-1">
+              {[1, 2, 3].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  aria-pressed={task.repeat_target === n}
+                  disabled={save.isPending}
+                  onClick={() => save.mutate({ taskId: task.id, repeats: n })}
+                  className={`h-9 w-9 rounded-full text-sm font-black ${task.repeat_target === n ? "bg-primary text-primary-foreground" : "bg-muted"}`}
+                >
+                  {n}
+                </button>
+              ))}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
