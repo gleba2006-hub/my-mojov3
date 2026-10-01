@@ -420,6 +420,30 @@ export type Database = {
           },
         ]
       }
+      avatars: {
+        Row: { id: string; name: string; stage1_path: string }
+        Insert: { id: string; name: string; stage1_path: string }
+        Update: { id?: string; name?: string; stage1_path?: string }
+        Relationships: []
+      }
+      coin_ledger: {
+        Row: { id: string; child_id: string; amount: number; reason: string; created_at: string }
+        Insert: { id?: string; child_id: string; amount: number; reason: string; created_at?: string }
+        Update: { id?: string; child_id?: string; amount?: number; reason?: string; created_at?: string }
+        Relationships: []
+      }
+      coin_wallets: {
+        Row: { child_id: string; balance: number; updated_at: string }
+        Insert: { child_id: string; balance?: number; updated_at?: string }
+        Update: { child_id?: string; balance?: number; updated_at?: string }
+        Relationships: []
+      }
+      streaks: {
+        Row: { child_id: string; current_count: number; best_count: number; last_active_date: string | null; shield_count: number }
+        Insert: { child_id: string; current_count?: number; best_count?: number; last_active_date?: string | null; shield_count?: number }
+        Update: { child_id?: string; current_count?: number; best_count?: number; last_active_date?: string | null; shield_count?: number }
+        Relationships: []
+      }
       money_ledger: {
         Row: {
           amount: number

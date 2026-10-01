@@ -76,7 +76,7 @@ function ChildHome({ me }: { me: MyContext }) {
             <img src={characterSrc(data.child.gender, stageFor(data.child.level))} alt="" className="absolute inset-x-0 bottom-8 mx-auto h-[46dvh] w-auto object-contain drop-shadow-2xl" />
             <div className="absolute inset-x-4 top-0 flex justify-between">
               <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רמה {data.child.level}</span>
-              <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">{data.child.xp % 100}/100</span>
+              <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רצף {data.streak}</span>
             </div>
             <LevelUp level={data.child.level} name={data.child.name} />
           </section>
@@ -110,7 +110,7 @@ function ChildHome({ me }: { me: MyContext }) {
         </>
       ) : null}
       {data && tab === "prize" ? (
-        <ShopGrid coins={coinsFromXp(data.child.xp)} busy={buy.isPending} onBuy={(item) => buy.mutate(item)} note={buy.isSuccess ? "נשלח להורה" : null} />
+        <ShopGrid coins={data.coins || coinsFromXp(data.child.xp)} busy={buy.isPending} onBuy={(item) => buy.mutate(item)} note={buy.isSuccess ? "נשלח להורה" : null} />
       ) : null}
       {data && tab === "jar" ? (
         <>

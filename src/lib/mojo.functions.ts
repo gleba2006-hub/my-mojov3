@@ -249,6 +249,16 @@ export const decideShop = createServerFn({ method: "POST" })
     if (!message) throw new Error("הבקשה לא נמצאה");
     await assertParent(context.userId, message.family_id);
     await db.from("messages").update({ body: `${data.approve ? "אושר" : "נדחה"}: ${message.body}` }).eq("id", message.id);
+    if (data.approve) {
+      const cost = Number(message.body.match(/(\d+)/)?.[1] ?? 0);
+      const childId = (await db.from("messages").select("child_id").eq("id", message.id).maybeSingle()).data?.child_id;
+      if (childId && cost > 0) {
+        const { data: wallet } = await db.from("coin_wallets").select("balance").eq("child_id", childId).maybeSingle();
+        const next = Math.max(0, Number(wallet?.balance ?? 0) - cost);
+        await db.from("coin_wallets").upsert({ child_id: childId, balance: next });
+        await db.from("coin_ledger").insert({ child_id: childId, amount: -cost, reason: message.body });
+      }
+    }
     return { ok: true };
   });
 
@@ -317,20 +327,22 @@ export const getBoard = createServerFn({ method: "GET" })
     const isSelf = child.user_id === context.userId;
     if (!isSelf) await assertParent(context.userId, child.family_id);
 
-    const [{ data: goals }, { data: tasks }, { data: allowance }, { data: ledger }, { data: messages }] =
+    const [{ data: goals }, { data: tasks }, { data: allowance }, { data: ledger }, { data: messages }, { data: wallet }, { data: streak }] =
       await Promise.all([
         db.from("goals").select("id, title, price_ils, method_id, method_config, status").eq("child_id", child.id).order("created_at", { ascending: false }),
         db.from("tasks").select("id, title, kind, status, category, xp_value, repeat_target, repeat_done, advances_goal, goal_id").eq("child_id", child.id).order("created_at"),
         db.from("child_allowances").select("period, base_amount, payout_day, home_amount, action_amount").eq("child_id", child.id).maybeSingle(),
         db.from("money_ledger").select("amount, type, reason, created_at").eq("child_id", child.id).order("created_at", { ascending: false }).limit(12),
         db.from("messages").select("id, body, created_at").eq("child_id", child.id).order("created_at", { ascending: false }).limit(8),
+        db.from("coin_wallets").select("balance").eq("child_id", child.id).maybeSingle(),
+        db.from("streaks").select("current_count, best_count").eq("child_id", child.id).maybeSingle(),
       ]);
     const balance = (ledger ?? []).reduce((sum, row) => {
       const n = Number(row.amount);
       if (row.type === "payout" || row.type === "deduct") return sum - n;
       return sum + n;
     }, 0);
-    return { child, goals: goals ?? [], tasks: tasks ?? [], allowance, ledger: ledger ?? [], messages: messages ?? [], balance };
+    return { child, goals: goals ?? [], tasks: tasks ?? [], allowance, ledger: ledger ?? [], messages: messages ?? [], balance, coins: wallet?.balance ?? 0, streak: streak?.current_count ?? 0 };
   });
 
 export const completeTask = createServerFn({ method: "POST" })
@@ -425,6 +437,22 @@ export const approveTask = createServerFn({ method: "POST" })
           await db.from("goals").update({ status: "completed" }).eq("id", goal.id);
         }
       }
+    }
+    if (task.child_id) {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: streak } = await db.from("streaks").select("current_count, best_count, last_active_date").eq("child_id", task.child_id).maybeSingle();
+      const last = streak?.last_active_date;
+      const current = last === today ? Number(streak?.current_count ?? 1) : Number(streak?.current_count ?? 0) + 1;
+      await db.from("streaks").upsert({
+        child_id: task.child_id,
+        current_count: current,
+        best_count: Math.max(current, Number(streak?.best_count ?? 0)),
+        last_active_date: today,
+      });
+      const { data: wallet } = await db.from("coin_wallets").select("balance").eq("child_id", task.child_id).maybeSingle();
+      const next = Number(wallet?.balance ?? 0) + 1;
+      await db.from("coin_wallets").upsert({ child_id: task.child_id, balance: next });
+      await db.from("coin_ledger").insert({ child_id: task.child_id, amount: 1, reason: task.title });
     }
     return { ok: true, goalProgress };
   });
