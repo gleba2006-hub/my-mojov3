@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  addChild,
   createInviteCode,
   decideJoinRequest,
   listChildren,
@@ -140,6 +141,7 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
       />
       <section className="surface-card p-4">
         <XpMeter xp={board.data?.child.xp ?? 0} level={board.data?.child.level ?? 1} />
+        <p className="mt-2 text-sm font-bold">{board.data?.coins ?? 0} מטבעות · רצף {board.data?.streak ?? 0}</p>
         <div className="mt-3">
           <AvatarPlate stage={stageFor(board.data?.child.level ?? 1)} gender={board.data?.child.gender ?? null} />
         </div>
@@ -500,9 +502,18 @@ function FamilyTab({
   children: Array<{ id: string; name: string; connected: boolean }>;
 }) {
   const [connecting, setConnecting] = useState<string | null>(null);
+  const [name, setName] = useState("");
   const active = children.find((c) => c.id === connecting);
   const invite = useMutation({ mutationFn: () => createInviteCode({ data: { familyId } }) });
   const qc = useQueryClient();
+  const add = useMutation({
+    mutationFn: () => addChild({ data: { familyId, name, gender: "girl", birthYear: new Date().getFullYear() - 8 } }),
+    onSuccess: async (res) => {
+      setName("");
+      await qc.invalidateQueries({ queryKey: ["children"] });
+      setConnecting(res.childId);
+    },
+  });
   const requests = useQuery({ queryKey: ["join-requests", familyId], queryFn: () => listJoinRequests({ data: { familyId } }) });
   const decide = useMutation({
     mutationFn: (v: { memberId: string; approve: boolean }) => decideJoinRequest({ data: v }),
