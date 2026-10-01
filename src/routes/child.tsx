@@ -78,7 +78,7 @@ function ChildHome({ me }: { me: MyContext }) {
         { id: "today", label: "בית" },
         { id: "tasks", label: "משימות" },
         { id: "prize", label: "חנות" },
-        { id: "jar", label: "הודעות" },
+        { id: "jar", label: "צנצנת" },
       ]}
     >
       {!data ? <p className="text-center text-sm text-muted-foreground">טוענים את הלוח…</p> : null}
@@ -146,17 +146,15 @@ function ChildHome({ me }: { me: MyContext }) {
       {data && tab === "jar" ? (
         <>
           <Jar amount={data.balance} caption={data.allowance ? `בסיס ${data.allowance.base_amount} ₪ ${data.allowance.period === "weekly" ? "בשבוע" : "בחודש"}` : "עוד בלי דמי כיס"} />
-          <TaskList title="נסגרו" tasks={closed} />
-          {data.messages.length > 0 ? (
-            <section className="surface-card p-4">
-              <h2 className="mb-2 font-black">פתקים</h2>
-              <ul className="flex flex-col gap-2">
-                {data.messages.map((m) => (
-                  <li key={m.id} className="rounded-2xl bg-muted px-3 py-2 text-sm">{m.body}</li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
+          <section className="surface-card p-4">
+            <h2 className="mb-2 font-black">הודעות מההורים</h2>
+            {data.messages.length === 0 ? <p className="text-sm text-muted-foreground">עוד אין פתקים.</p> : null}
+            <ul className="flex flex-col gap-2">
+              {data.messages.map((m) => (
+                <li key={m.id} className="rounded-2xl bg-muted px-3 py-2 text-sm">{m.body}</li>
+              ))}
+            </ul>
+          </section>
         </>
       ) : null}
     </AppFrame>

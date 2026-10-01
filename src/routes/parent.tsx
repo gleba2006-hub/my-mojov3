@@ -95,6 +95,7 @@ function ParentHome({ me }: { me: MyContext }) {
       {tab === "more" ? (
         <>
           <Shop children={children.data ?? []} />
+          <FamilyNotes children={children.data ?? []} />
           <FamilyTab familyId={me.family!.id} children={children.data ?? []} />
           <section className="surface-card p-4">
             <h2 className="font-black">{plan.live ? `${plan.priceIls} ₪ ל${plan.period}` : "חינם כרגע"}</h2>
@@ -574,6 +575,51 @@ function Shop({ children }: { children: Array<{ id: string; name: string }> }) {
         );
       })}
     </ul>
+  );
+}
+
+
+function FamilyNotes({ children }: { children: Array<{ id: string; name: string }> }) {
+  const qc = useQueryClient();
+  const [childId, setChildId] = useState(children[0]?.id ?? "");
+  const boards = useQuery({
+    queryKey: ["notes", children.map((c) => c.id).join(",")],
+    enabled: children.length > 0,
+    queryFn: () => Promise.all(children.map(async (c) => ({ child: c, board: await getBoard({ data: { childId: c.id } }) }))),
+  });
+  const note = useMutation({
+    mutationFn: (body: string) => sendNote({ data: { childId, body } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notes"] }),
+  });
+  const rows = (boards.data ?? []).flatMap(({ child, board }) => board.messages.map((m) => ({ ...m, childName: child.name })));
+  return (
+    <section className="surface-card flex flex-col gap-3 p-4">
+      <h2 className="font-black">הודעות</h2>
+      {children.length === 0 ? <p className="text-sm text-muted-foreground">קודם מוסיפים ילד.</p> : null}
+      <form
+        className="flex flex-col gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const body = new FormData(e.currentTarget).get("note");
+          if (typeof body === "string" && body.trim()) note.mutate(body.trim());
+          e.currentTarget.reset();
+        }}
+      >
+        <select value={childId} onChange={(e) => setChildId(e.target.value)} className="h-11 rounded-xl border border-input bg-background px-3">
+          {children.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        <Input name="note" maxLength={280} placeholder="פתק לילד" />
+        <Button type="submit" variant="secondary" disabled={note.isPending || !childId}>שליחה</Button>
+      </form>
+      {rows.length === 0 ? <p className="text-sm text-muted-foreground">עוד אין הודעות.</p> : null}
+      <ul className="flex flex-col gap-2">
+        {rows.map((m) => (
+          <li key={m.id} className="rounded-2xl bg-muted px-3 py-2 text-sm">
+            <span className="font-black">{m.childName}</span> · {m.body}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
