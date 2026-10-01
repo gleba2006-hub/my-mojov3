@@ -78,10 +78,10 @@ CREATE POLICY rr_read ON public.reward_price_ranges FOR SELECT TO anon, authenti
 CREATE POLICY rp_read ON public.reward_paths FOR SELECT TO anon, authenticated USING (true);
 CREATE POLICY rpt_read ON public.reward_path_tasks FOR SELECT TO anon, authenticated USING (true);
 CREATE POLICY allow_read ON public.child_allowances FOR SELECT TO authenticated
-  USING (public.can_access_child(auth.uid(), child_id));
+  USING (app_private.can_access_child(auth.uid(), child_id));
 CREATE POLICY allow_write ON public.child_allowances FOR ALL TO authenticated
-  USING (public.can_manage_child(auth.uid(), child_id))
-  WITH CHECK (public.can_manage_child(auth.uid(), child_id));
+  USING (app_private.can_manage_child(auth.uid(), child_id))
+  WITH CHECK (app_private.can_manage_child(auth.uid(), child_id));
 
 INSERT INTO public.reward_price_ranges (id, label, min_ils, max_ils, task_count, sort_order) VALUES ('r1', $mj$עד 300 ש״ח$mj$, 0, 300, 4, 1) ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.reward_paths (id, range_id, path_index, name) VALUES ('r1p1', 'r1', 1, $mj$צמיחה ויוזמה$mj$) ON CONFLICT (id) DO NOTHING;
