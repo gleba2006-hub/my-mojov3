@@ -148,7 +148,7 @@ function ChildHome({ me }: { me: MyContext }) {
         </>
       ) : null}
       {data && tab === "prize" ? (
-        <ShopGrid coins={data.coins || coinsFromXp(data.child.xp)} busy={buy.isPending} onBuy={(item) => buy.mutate(item)} note={buy.isSuccess ? "נשלח להורה" : null} />
+        <ShopGrid coins={data.coins || coinsFromXp(data.child.xp)} busy={buy.isPending} onBuy={(item) => buy.mutate(item)} note={buy.error instanceof Error ? buy.error.message : buy.isSuccess ? "נשלח להורה" : null} />
       ) : null}
       {data && tab === "jar" ? (
         <>

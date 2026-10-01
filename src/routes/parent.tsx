@@ -131,7 +131,11 @@ function PrizeReady({ children }: { children: Array<{ id: string; name: string }
   });
   const give = useMutation({
     mutationFn: (goalId: string) => deliverGoal({ data: { goalId } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["prizes"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["prizes"] });
+      qc.invalidateQueries({ queryKey: ["board"] });
+      qc.invalidateQueries({ queryKey: ["shop"] });
+    },
   });
   const rows = (boards.data ?? []).flatMap(({ child, board }) =>
     board.goals
@@ -220,6 +224,10 @@ function KidCard({ child, onGoal }: { child: { id: string; name: string; connect
         progress={progress}
       />
       <Button type="button" className="h-11 font-black" onClick={onGoal}>{goal ? "עריכת שיטה ומתנה" : "בחירת שיטה ומתנה"}</Button>
+      <p className="text-sm font-bold">
+        {waiting ? `${waiting} מחכות לאישור. ` : ""}
+        {!goal ? "הצעד הבא: בוחרים שיטה ופותחים מתנה." : pocket ? "הצעד הבא: משימות ממלאות את הצנצנת." : "הצעד הבא: מאשרים משימות שסופרות למתנה."}
+      </p>
       <section className="surface-card p-4">
         <XpMeter xp={board.data?.child.xp ?? 0} level={board.data?.child.level ?? 1} />
         <p className="mt-2 text-sm font-bold">{board.data?.coins ?? 0} מטבעות · רצף {board.data?.streak ?? 0}</p>
