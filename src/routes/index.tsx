@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { LogoMark, LogoSplash } from "@/components/brand";
 import { endDemo } from "@/lib/demo";
-import { listMethods } from "@/methods/registry";
+import { MethodGuide } from "@/components/method-guide";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
@@ -15,7 +15,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const methods = listMethods();
   useEffect(() => {
     endDemo();
   }, []);
@@ -37,13 +36,8 @@ function Index() {
           </Link>
           <Link to="/join" className="tap-target text-center text-sm font-black text-primary">ילד/ה? חיבור עם קוד</Link>
         </nav>
-        <section className="mt-8 flex flex-col gap-2">
-          {methods.map((method) => (
-            <article key={method.id} className="rounded-[28px] bg-card/90 p-4 backdrop-blur">
-              <h2 className="font-black">{method.name}</h2>
-              <p className="mt-1 text-sm">{method.tagline}</p>
-            </article>
-          ))}
+        <section className="mt-8">
+          <MethodGuide />
         </section>
       </div>
     </main>

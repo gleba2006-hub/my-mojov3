@@ -33,6 +33,7 @@ import {
 import { AvatarPlate } from "@/components/avatar-plate";
 import { parentVideos } from "@/components/brand";
 import { Chip, ChipRow, Hero, Jar } from "@/components/mojo-ui";
+import { MethodGuide } from "@/components/method-guide";
 import { endDemo } from "@/lib/demo";
 import { listMethods } from "@/methods/registry";
 import { RequireAuth, signOut } from "@/lib/session";
@@ -92,6 +93,7 @@ function ParentHome({ me }: { me: MyContext }) {
         <>
           <Shop children={children.data ?? []} />
           <FamilyTab familyId={me.family!.id} children={children.data ?? []} />
+          <MethodGuide />
           <section className="surface-card p-4">
             <h2 className="mb-2 font-black">סרטוני הסבר</h2>
             <ul className="flex flex-col gap-2">
@@ -340,6 +342,7 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
         <p className="text-sm font-bold">
           {methodId === "tracks" ? "רק משימות אקשן סופרות למתנה. בית נותן נקודות." : methodId === "classic" ? "כל משימה שאושרה מקרבת למתנה." : "המתנה נפתחת כשהצנצנת מגיעה למחיר. אין מסלול."}
         </p>
+        <MethodGuide id={methodId} />
         <h2 className="text-lg font-black">2. המתנה</h2>
         <Label htmlFor="kid">ילד/ה</Label>
         <select id="kid" value={childId} onChange={(e) => setChildId(e.target.value)} className="h-11 rounded-xl border border-input bg-background px-3">
