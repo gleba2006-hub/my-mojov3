@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
@@ -9,8 +9,7 @@ import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
 import { completeTask, getBoard, requestPrize, requestShop, setAvatar, setPet } from "@/lib/mojo.functions";
 import { coinsFromXp, shopItems } from "@/lib/shop";
-import { DemoChild } from "@/components/demo-boards";
-import { useDemo } from "@/lib/use-demo";
+import { endDemo } from "@/lib/demo";
 import { RequireAuth, signOut } from "@/lib/session";
 import type { MyContext } from "@/lib/family.functions";
 
@@ -20,8 +19,9 @@ export const Route = createFileRoute("/child")({
 });
 
 function ChildGate() {
-  const demo = useDemo();
-  if (demo) return <DemoChild />;
+  useEffect(() => {
+    endDemo();
+  }, []);
   return <RequireAuth allow={["child"]}>{(me) => <ChildHome me={me} />}</RequireAuth>;
 }
 

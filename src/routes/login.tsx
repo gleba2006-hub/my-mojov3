@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogoMark, LogoSplash } from "@/components/brand";
-import { startDemo } from "@/lib/demo";
+import { endDemo } from "@/lib/demo";
 import { useSession } from "@/lib/session";
 
 export const Route = createFileRoute("/login")({
@@ -23,6 +23,7 @@ function LoginPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    endDemo();
     if (session) navigate({ to: "/app" });
   }, [session, navigate]);
 
@@ -53,18 +54,6 @@ function LoginPage() {
       <AuthShell
       title="ברוכים השבים"
       subtitle="כניסה להורים"
-      top={
-        <button
-          type="button"
-          onClick={() => {
-            startDemo("parent");
-            navigate({ to: "/parent" });
-          }}
-          className="tap-target w-full bg-xp px-4 text-sm font-black text-xp-foreground"
-        >
-          DEMO · לוח הורה ושני ילדים
-        </button>
-      }
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <FormError message={error} />

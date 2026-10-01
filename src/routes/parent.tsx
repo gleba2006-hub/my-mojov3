@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
@@ -33,8 +33,7 @@ import {
 import { AvatarPlate } from "@/components/avatar-plate";
 import { parentVideos } from "@/components/brand";
 import { Chip, ChipRow, Hero, Jar } from "@/components/mojo-ui";
-import { DemoParent } from "@/components/demo-boards";
-import { useDemo } from "@/lib/use-demo";
+import { endDemo } from "@/lib/demo";
 import { listMethods } from "@/methods/registry";
 import { RequireAuth, signOut } from "@/lib/session";
 
@@ -44,8 +43,9 @@ export const Route = createFileRoute("/parent")({
 });
 
 function ParentGate() {
-  const demo = useDemo();
-  if (demo) return <DemoParent />;
+  useEffect(() => {
+    endDemo();
+  }, []);
   return <RequireAuth allow={["parent"]}>{(me) => <ParentHome me={me} />}</RequireAuth>;
 }
 

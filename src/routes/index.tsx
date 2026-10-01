@@ -1,7 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { LogoMark, LogoSplash } from "@/components/brand";
-import { startDemo } from "@/lib/demo";
+import { endDemo } from "@/lib/demo";
 import { listMethods } from "@/methods/registry";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -15,7 +16,9 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const methods = listMethods();
-  const navigate = useNavigate();
+  useEffect(() => {
+    endDemo();
+  }, []);
   return (
     <main className="safe-pad min-h-[100dvh] bg-cover bg-center" style={{ backgroundImage: "url(/brand/bg-parent-home.png)" }}>
       <LogoSplash />
@@ -32,16 +35,6 @@ function Index() {
           <Link to="/login" className="tap-target flex items-center justify-center rounded-full bg-card px-4 text-lg font-black">
             כניסה
           </Link>
-          <button
-            type="button"
-            onClick={() => {
-              startDemo("parent");
-              navigate({ to: "/parent" });
-            }}
-            className="tap-target rounded-full bg-xp px-4 text-lg font-black text-xp-foreground"
-          >
-            לראות דמו
-          </button>
           <Link to="/join" className="tap-target text-center text-sm font-black text-primary">ילד/ה? חיבור עם קוד</Link>
         </nav>
         <section className="mt-8 flex flex-col gap-2">

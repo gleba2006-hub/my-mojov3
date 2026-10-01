@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { endDemo } from "@/lib/demo";
 import { getMyContext, type MyContext } from "@/lib/family.functions";
 
 export function useSession() {
@@ -91,5 +92,6 @@ export function RequireAuth({
 }
 
 export async function signOut() {
+  endDemo();
   await supabase.auth.signOut();
 }
