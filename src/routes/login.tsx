@@ -25,7 +25,15 @@ function LoginPage() {
 
   useEffect(() => {
     endDemo();
-    if (session) navigate({ to: "/app" });
+    if (session) {
+      const next = sessionStorage.getItem("mm-next");
+      if (next === "/admin") {
+        sessionStorage.removeItem("mm-next");
+        navigate({ to: "/admin" });
+        return;
+      }
+      navigate({ to: "/app" });
+    }
   }, [session, navigate]);
 
   async function onSubmit(e: FormEvent) {

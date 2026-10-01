@@ -71,10 +71,14 @@ export function RequireAuth({
   useEffect(() => {
     if (loading) return;
     if (!session) {
+      if (allow.includes("admin") && typeof window !== "undefined") {
+        sessionStorage.setItem("mm-next", "/admin");
+      }
       navigate({ to: "/login" });
       return;
     }
     if (!me) return;
+    const onAdmin = allow.includes("admin") && me.role === "admin";
     const kind: Allowed = me.childId
       ? "child"
       : me.family
@@ -82,7 +86,7 @@ export function RequireAuth({
         : me.role === "admin"
           ? "admin"
           : (me.role ?? "newcomer");
-    if (!allow.includes(kind) && !(me.role === "admin" && allow.includes("parent") && me.family)) {
+    if (!onAdmin && !allow.includes(kind) && !(me.role === "admin" && allow.includes("parent") && me.family)) {
       navigate({ to: homePathFor(me) });
     }
   }, [loading, session, me, allow, navigate]);
