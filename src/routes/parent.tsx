@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
+import { characterSrc, characters } from "@/components/brand";
 import { FormError } from "@/components/auth-shell";
 import { ConnectChild } from "@/components/connect-child";
 import { Button } from "@/components/ui/button";
@@ -130,8 +131,20 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
   const goal = board.data?.goals.find((g) => g.status === "active");
   const done = (board.data?.tasks ?? []).filter((t) => t.advances_goal && t.status === "approved").length;
   const target = Number((goal?.method_config as { taskTarget?: number } | null)?.taskTarget ?? 0);
+  const open = (board.data?.tasks ?? []).filter((t) => t.status === "active").length;
+  const waiting = (board.data?.tasks ?? []).filter((t) => t.status === "pending_approval").length;
+  const stage = stageFor(board.data?.child.level ?? 1);
+  const face = characters.find((c) => c.id === board.data?.child.avatar_id)?.src ?? characterSrc(board.data?.child.gender, stage);
   return (
     <div className="flex flex-col gap-3">
+      <section className="surface-card flex items-center gap-3 p-4">
+        <img src={face} alt="" className="h-24 w-24 object-contain" />
+        <div>
+          <p className="text-xl font-black">{child.name}</p>
+          <p className="text-sm font-bold">רמה {board.data?.child.level ?? 1} · שלב {stage}</p>
+          <p className="text-sm text-muted-foreground">{open} פתוחות · {waiting} ממתינות</p>
+        </div>
+      </section>
       <Jar amount={board.data?.balance ?? 0} caption={child.connected ? "מכשיר מחובר" : "עוד בלי מכשיר"} />
       <Hero
         eyebrow={(goal?.method_config as { pathName?: string } | undefined)?.pathName ?? "אין מטרה"}
@@ -142,9 +155,6 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
       <section className="surface-card p-4">
         <XpMeter xp={board.data?.child.xp ?? 0} level={board.data?.child.level ?? 1} />
         <p className="mt-2 text-sm font-bold">{board.data?.coins ?? 0} מטבעות · רצף {board.data?.streak ?? 0}</p>
-        <div className="mt-3">
-          <AvatarPlate stage={stageFor(board.data?.child.level ?? 1)} gender={board.data?.child.gender ?? null} />
-        </div>
         {board.data?.ledger.length ? (
           <ul className="mt-3 flex flex-col gap-1">
             {board.data.ledger.slice(0, 3).map((row) => (
