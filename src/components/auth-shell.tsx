@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { LogoMark } from "@/components/brand";
 import { cn } from "@/lib/utils";
 
 export function AuthShell({
@@ -19,9 +20,7 @@ export function AuthShell({
       {top}
       <div className={cn("mx-auto w-full max-w-md px-5 pb-16 pt-8", className)}>
         <header className="mb-6 text-center">
-          <span className="inline-flex items-center rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground shadow-[var(--shadow-pop)]">
-            MyMojo
-          </span>
+          <LogoMark className="mx-auto h-12" />
           <h1 className="mt-5 text-3xl font-black leading-tight text-foreground">{title}</h1>
           {subtitle ? <p className="mt-2 text-base text-muted-foreground">{subtitle}</p> : null}
         </header>

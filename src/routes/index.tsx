@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { LogoMark, LogoSplash } from "@/components/brand";
 import { startDemo } from "@/lib/demo";
 import { listMethods } from "@/methods/registry";
 
@@ -28,11 +29,10 @@ function Index() {
 
   return (
     <main className="safe-pad min-h-screen gradient-hero">
+      <LogoSplash />
       <div className="mx-auto w-full max-w-md px-5 pb-16 pt-12">
         <header className="text-center">
-          <span className="inline-flex items-center rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground shadow-[var(--shadow-pop)]">
-            MyMojo
-          </span>
+          <LogoMark className="mx-auto h-14" />
           <h1 className="mt-6 text-4xl font-black leading-tight text-foreground">
             משימות שהופכות למתנות
           </h1>

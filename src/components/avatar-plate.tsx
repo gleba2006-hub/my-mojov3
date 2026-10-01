@@ -1,27 +1,16 @@
-const stages = [
-  { label: "ניצן", color: "#F6C90E" },
-  { label: "צומח", color: "#7BC47F" },
-  { label: "בטוח", color: "#3D9B8F" },
-  { label: "גיבור", color: "#E07A5F" },
-  { label: "אגדה", color: "#6C4AB6" },
-];
+import { characterSrc, petSrc } from "@/components/brand";
 
-export function AvatarPlate({ stage, pet }: { stage: number; pet?: string }) {
+const stages = ["ניצן", "צומח", "בטוח", "גיבור", "אגדה"];
+
+export function AvatarPlate({ stage, pet, gender }: { stage: number; pet?: string; gender?: string | null }) {
   const safe = Math.min(5, Math.max(1, stage));
-  const current = stages[safe - 1]!;
   return (
     <div className="flex items-center gap-3">
-      <div className="grid grid-cols-5 gap-1" aria-label={`שלב דמות ${safe}`}>
-        {stages.map((item, i) => (
-          <span
-            key={item.label}
-            className="h-8 w-8 rounded-full border-2 border-background"
-            style={{ background: i < safe ? item.color : "var(--muted)", opacity: i === safe - 1 ? 1 : 0.55 }}
-          />
-        ))}
-      </div>
+      <img src={characterSrc(gender, safe)} alt="" className="h-20 w-20 object-contain" />
+      <img src={petSrc(pet ?? gender ?? "a")} alt="" className="h-12 w-12 object-contain" />
       <div>
-        <p className="text-sm font-black" style={{ color: current.color }}>{current.label}</p>
+        <p className="text-sm font-black">{stages[safe - 1]}</p>
+        <p className="text-xs text-muted-foreground">שלב {safe} מתוך 5 · כל 3 רמות</p>
         {pet ? <p className="text-xs text-muted-foreground">{pet}</p> : null}
       </div>
     </div>

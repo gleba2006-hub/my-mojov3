@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
+import { taskIcon } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Chip, ChipRow, Hero, Jar } from "@/components/mojo-ui";
 import {
@@ -43,6 +44,7 @@ export function DemoParent() {
         { id: "home", label: "בית" },
         { id: "approve", label: "אישור", ...(waiting.length ? { badge: waiting.length } : {}) },
       ]}
+      background="/brand/bg-parent-home.png"
     >
       <DemoSwitch />
       {tab === "home" ? (
@@ -56,7 +58,7 @@ export function DemoParent() {
           <Hero eyebrow={kid.goal.path} title={kid.goal.title} detail={`${done}/${kid.goal.target} · ${kid.goal.price} ₪`} progress={(done / kid.goal.target) * 100} />
           <section className="surface-card p-4">
             <XpMeter xp={kid.xp} level={kid.level} />
-            <div className="mt-3"><AvatarPlate stage={stageFor(kid.level)} pet={kid.pet} /></div>
+            <div className="mt-3"><AvatarPlate stage={stageFor(kid.level)} pet={kid.pet} gender={kid.gender} /></div>
           </section>
           <Button type="button" onClick={() => { setDemoView("child", kid.id); navigate({ to: "/child" }); }}>
             לראות כמו {kid.name}
@@ -111,13 +113,15 @@ export function DemoChild() {
         { id: "prize", label: "מתנה" },
         { id: "jar", label: "צנצנת" },
       ]}
+      background="/brand/room-1.png"
+      icons={{ today: "/brand/nav-home.png", prize: "/brand/nav-gifts.png", jar: "/brand/nav-chat.png" }}
     >
       <DemoSwitch />
       {tab === "today" ? (
         <>
           <section className="surface-card p-4">
             <XpMeter xp={kid.xp} level={kid.level} />
-            <div className="mt-3"><AvatarPlate stage={stageFor(kid.level)} pet={kid.pet} /></div>
+            <div className="mt-3"><AvatarPlate stage={stageFor(kid.level)} pet={kid.pet} gender={kid.gender} /></div>
           </section>
           <TaskBlock title="לעשות היום" tasks={open} onDone={demoComplete} />
           <TaskBlock title="מחכה להורה" tasks={waiting} locked />
@@ -156,9 +160,12 @@ function TaskBlock({ title, tasks, locked, onDone }: { title: string; tasks: Dem
       <ul className="flex flex-col gap-2">
         {tasks.map((task) => (
           <li key={task.id} className="surface-card flex items-center justify-between gap-3 px-4 py-3">
-            <div>
-              <p className="font-black">{task.title}</p>
-              <p className="text-xs text-muted-foreground">{task.kind === "action" ? "אקשן" : "בית"} · {task.repeat_done}/{task.repeat_target}</p>
+            <div className="flex items-center gap-3">
+              <img src={taskIcon(task.title)} alt="" className="h-12 w-12 object-contain" />
+              <div>
+                <p className="font-black">{task.title}</p>
+                <p className="text-xs text-muted-foreground">{task.kind === "action" ? "אקשן" : "בית"} · {task.repeat_done}/{task.repeat_target}</p>
+              </div>
             </div>
             {onDone ? <Button type="button" size="sm" className="tap-target" onClick={() => onDone(task.id)}>סיימתי</Button> : locked ? <span className="text-xs font-bold text-muted-foreground">נעול</span> : null}
           </li>

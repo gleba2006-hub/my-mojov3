@@ -5,6 +5,7 @@ import { AuthShell, FormError, GoogleIcon } from "@/components/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LogoMark, LogoSplash } from "@/components/brand";
 import { startDemo } from "@/lib/demo";
 import { useSession } from "@/lib/session";
 
@@ -47,7 +48,9 @@ function LoginPage() {
   }
 
   return (
-    <AuthShell
+    <>
+      <LogoSplash />
+      <AuthShell
       title="ברוכים השבים"
       subtitle="כניסה להורים"
       top={
@@ -138,5 +141,6 @@ function LoginPage() {
         </p>
       </div>
     </AuthShell>
+    </>
   );
 }

@@ -8,6 +8,8 @@ export function AppFrame({
   onTab,
   onSignOut,
   children,
+  background,
+  icons,
 }: {
   title: string;
   kicker?: string;
@@ -16,9 +18,11 @@ export function AppFrame({
   onTab: (id: string) => void;
   onSignOut: () => void;
   children: ReactNode;
+  background?: string;
+  icons?: Record<string, string>;
 }) {
   return (
-    <div className="safe-pad min-h-[100dvh] gradient-hero">
+    <div className="safe-pad min-h-[100dvh] gradient-hero" style={background ? { backgroundImage: `url(${background})`, backgroundSize: "cover" } : undefined}>
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col px-4 pb-28 pt-4">
         <header className="mb-4 flex items-center justify-between gap-3">
           <div className="min-w-0">
@@ -46,6 +50,7 @@ export function AppFrame({
                   onClick={() => onTab(item.id)}
                   className={`tap-target relative w-full rounded-2xl text-sm font-black ${on ? "bg-primary text-primary-foreground shadow-[var(--shadow-pop)]" : "text-muted-foreground"}`}
                 >
+                  {icons?.[item.id] ? <img src={icons[item.id]} alt="" className="mx-auto h-7 w-7 object-contain" /> : null}
                   {item.label}
                   {item.badge ? (
                     <span className="absolute start-1 top-1 min-w-5 rounded-full bg-xp px-1 text-[10px] leading-5 text-xp-foreground">
@@ -78,9 +83,5 @@ export function XpMeter({ xp, level }: { xp: number; level: number }) {
 }
 
 export function stageFor(level: number) {
-  if (level >= 8) return 5;
-  if (level >= 6) return 4;
-  if (level >= 4) return 3;
-  if (level >= 2) return 2;
-  return 1;
+  return Math.min(5, Math.floor((Math.max(1, level) - 1) / 3) + 1);
 }

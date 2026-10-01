@@ -28,6 +28,7 @@ import {
   setRepeats,
 } from "@/lib/mojo.functions";
 import { AvatarPlate } from "@/components/avatar-plate";
+import { parentVideos } from "@/components/brand";
 import { Chip, ChipRow, Hero, Jar } from "@/components/mojo-ui";
 import { DemoParent } from "@/components/demo-boards";
 import { useDemo } from "@/lib/use-demo";
@@ -63,6 +64,7 @@ function ParentHome({ me }: { me: MyContext }) {
       tab={tab}
       onTab={setTab}
       onSignOut={() => signOut()}
+      background={tab === "approve" ? "/brand/bg-parent-approve.png" : "/brand/bg-parent-home.png"}
       tabs={[
         { id: "home", label: "בית" },
         { id: "approve", label: "אישור", ...(pending.data ? { badge: pending.data } : {}) },
@@ -77,6 +79,18 @@ function ParentHome({ me }: { me: MyContext }) {
         <>
           <Shop children={children.data ?? []} />
           <FamilyTab familyId={me.family!.id} children={children.data ?? []} />
+          <section className="surface-card p-4">
+            <h2 className="mb-2 font-black">סרטוני הסבר</h2>
+            <ul className="flex flex-col gap-2">
+              {parentVideos.map((video) => (
+                <li key={video.id}>
+                  <a className="font-bold text-primary" href={`https://drive.google.com/file/d/${video.id}/view`} target="_blank" rel="noreferrer">
+                    {video.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
         </>
       ) : null}
     </AppFrame>
@@ -116,7 +130,7 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
       <section className="surface-card p-4">
         <XpMeter xp={board.data?.child.xp ?? 0} level={board.data?.child.level ?? 1} />
         <div className="mt-3">
-          <AvatarPlate stage={stageFor(board.data?.child.level ?? 1)} />
+          <AvatarPlate stage={stageFor(board.data?.child.level ?? 1)} gender={board.data?.child.gender ?? null} />
         </div>
         {board.data?.ledger.length ? (
           <ul className="mt-3 flex flex-col gap-1">

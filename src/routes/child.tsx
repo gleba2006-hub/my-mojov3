@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
+import { taskIcon } from "@/components/brand";
 import { Hero, Jar } from "@/components/mojo-ui";
 import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,8 @@ function ChildHome({ me }: { me: MyContext }) {
       tab={tab}
       onTab={setTab}
       onSignOut={() => signOut()}
+      background="/brand/room-1.png"
+      icons={{ today: "/brand/nav-home.png", prize: "/brand/nav-gifts.png", jar: "/brand/nav-chat.png" }}
       tabs={[
         { id: "today", label: "היום" },
         { id: "prize", label: "מתנה" },
@@ -62,7 +65,7 @@ function ChildHome({ me }: { me: MyContext }) {
           <section className="surface-card p-4">
             <XpMeter xp={data.child.xp} level={data.child.level} />
             <div className="mt-3">
-              <AvatarPlate stage={stageFor(data.child.level)} />
+              <AvatarPlate stage={stageFor(data.child.level)} gender={data.child.gender} />
             </div>
             <LevelUp level={data.child.level} name={data.child.name} />
           </section>
@@ -125,9 +128,12 @@ function TaskList({
       <ul className="flex flex-col gap-2">
         {tasks.map((task) => (
           <li key={task.id} className="surface-card flex items-center justify-between gap-3 px-4 py-3">
-            <div>
-              <p className="font-bold">{task.title}</p>
-              <p className="text-xs text-muted-foreground">{task.kind === "action" ? "אקשן" : "בית"} · {task.category}</p>
+            <div className="flex items-center gap-3">
+              <img src={taskIcon(task.title)} alt="" className="h-12 w-12 object-contain" />
+              <div>
+                <p className="font-bold">{task.title}</p>
+                <p className="text-xs text-muted-foreground">{task.kind === "action" ? "אקשן" : "בית"} · {task.category}</p>
+              </div>
             </div>
             {action ? (
               <Button type="button" size="sm" disabled={busy} onClick={() => action(task.id)} className="tap-target">
