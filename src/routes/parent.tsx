@@ -347,6 +347,24 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
       </section>
 
       {board.data?.goals[0] ? (
+        <section className="surface-card p-4">
+          <h2 className="mb-2 font-black">קטלוג מוכן</h2>
+          <div className="flex flex-wrap gap-2">
+            {["סידור החדר", "כלים", "שיניים", "אשפה", "מיטה", "חיה", "כביסה", "קריאה"].map((title) => (
+              <button
+                key={title}
+                type="button"
+                className="rounded-full bg-muted px-3 py-2 text-sm font-black"
+                onClick={() => addCustomTask({ data: { goalId: board.data!.goals[0]!.id, title, kind: "home", repeats: 1 } }).then(() => qc.invalidateQueries({ queryKey: ["board"] }))}
+              >
+                {title}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {board.data?.goals[0] ? (
         <form
           className="surface-card flex flex-col gap-2 p-4"
           onSubmit={(e) => {
