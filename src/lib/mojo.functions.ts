@@ -529,6 +529,34 @@ export const markPaid = createServerFn({ method: "POST" })
     return { paid: balance };
   });
 
+
+export const creditBase = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ childId: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    const db = await admin();
+    const { data: child } = await db.from("child_profiles").select("family_id").eq("id", data.childId).maybeSingle();
+    if (!child) throw new Error("הילד לא נמצא");
+    await assertParent(context.userId, child.family_id);
+    const { data: allowance } = await db.from("child_allowances").select("base_amount, period").eq("child_id", data.childId).maybeSingle();
+    const amount = Number(allowance?.base_amount ?? 0);
+    if (amount <= 0) throw new Error("קודם שומרים סכום בסיס");
+    await db.from("money_ledger").insert({
+      child_id: data.childId,
+      amount,
+      type: "earn",
+      reason: allowance?.period === "monthly" ? "בסיס חודשי" : "בסיס שבועי",
+      created_by: context.userId,
+    });
+    const { data: goal } = await db.from("goals").select("id, method_id, price_ils, status").eq("child_id", data.childId).eq("status", "active").eq("method_id", "pocket_money").maybeSingle();
+    if (goal) {
+      const { data: ledger } = await db.from("money_ledger").select("amount, type").eq("child_id", data.childId);
+      const balance = (ledger ?? []).reduce((sum, row) => sum + (row.type === "earn" ? Number(row.amount) : -Number(row.amount)), 0);
+      if (balance >= Number(goal.price_ils ?? 0)) await db.from("goals").update({ status: "completed" }).eq("id", goal.id);
+    }
+    return { credited: amount };
+  });
+
 export const sendNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ childId: z.string().uuid(), body: z.string().trim().min(1).max(280) }))

@@ -26,6 +26,7 @@ import {
   getBoard,
   listRanges,
   markPaid,
+  creditBase,
   saveAllowance,
   sendNote,
   setRepeats,
@@ -262,7 +263,7 @@ function Approvals({ children }: { children: Array<{ id: string; name: string }>
         <li key={task.id} className="surface-card p-4">
           <p className="font-black">{task.title}</p>
           <p className="text-sm text-muted-foreground">
-            {task.childName} · {task.shop ? "חנות" : task.kind === "action" ? "אקשן מקדם מסלול" : "בית נותן נקודות"} · {task.repeat_done}/{task.repeat_target}
+            {task.childName} · {task.shop ? "חנות" : task.advances_goal ? "סופר למתנה" : "רק נקודות"} · {task.repeat_done}/{task.repeat_target}
           </p>
           <div className="mt-3 flex gap-2">
             {task.shop ? (
@@ -338,6 +339,10 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
   });
   const pay = useMutation({
     mutationFn: () => markPaid({ data: { childId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
+  });
+  const basePay = useMutation({
+    mutationFn: () => creditBase({ data: { childId } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
   });
   const note = useMutation({
@@ -425,6 +430,7 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
         <p className="text-xs text-muted-foreground">בסיס, תדירות, תשלום לבית, תשלום לאקשן. חל קדימה בלבד.</p>
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={() => allowance.mutate()} disabled={allowance.isPending}>שמירה</Button>
+          <Button type="button" onClick={() => basePay.mutate()} disabled={basePay.isPending}>הפקד בסיס</Button>
           <Button type="button" onClick={() => pay.mutate()} disabled={pay.isPending}>סמן כשולם</Button>
         </div>
         <FormError message={pay.error instanceof Error ? pay.error.message : null} />
