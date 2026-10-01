@@ -46,9 +46,26 @@ export function LogoMark({ className = "h-10" }: { className?: string }) {
   return <img src="/brand/logo.png" alt="MyMojo" className={`${className} w-auto object-contain`} />;
 }
 
+export const characters = [
+  { id: "tree", name: "עץ", src: "/brand/boy-tree-1.png" },
+  { id: "fury", name: "אש", src: "/brand/boy-fury-1.png" },
+  { id: "vulcano", name: "הר", src: "/brand/boy-vulcano-1.png" },
+  { id: "pinka", name: "פינקה", src: "/brand/girl-pinka-1.png" },
+  { id: "clauda", name: "קלאודיה", src: "/brand/girl-clauda-1.png" },
+  { id: "jelly", name: "מדוזה", src: "/brand/girl-jelly-1.png" },
+];
+
+export function chosenCharacter() {
+  if (typeof window === "undefined") return characters[0]!;
+  const id = localStorage.getItem("mymojo-character");
+  return characters.find((c) => c.id === id) ?? characters[0]!;
+}
+
 export function characterSrc(gender: string | null | undefined, stage: number) {
+  const chosen = chosenCharacter();
+  if (chosen.id !== "tree" && chosen.id !== "pinka") return chosen.src;
   const n = Math.min(5, Math.max(1, stage));
-  const girl = gender === "girl" || gender === "female";
+  const girl = gender === "girl" || gender === "female" || chosen.id === "pinka";
   return girl ? `/brand/girl-pinka-${n}.png` : `/brand/boy-tree-${n}.png`;
 }
 

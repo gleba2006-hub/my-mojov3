@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
-import { characterSrc, taskIcon } from "@/components/brand";
+import { characterSrc, characters, taskIcon } from "@/components/brand";
 import { Hero, Jar } from "@/components/mojo-ui";
 import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
@@ -29,9 +29,13 @@ function ChildHome({ me }: { me: MyContext }) {
   const qc = useQueryClient();
   const [tab, setTab] = useState("today");
   const board = useQuery({ queryKey: ["board", me.childId], queryFn: () => getBoard({ data: {} }) });
+  const [cheer, setCheer] = useState("");
   const done = useMutation({
     mutationFn: (taskId: string) => completeTask({ data: { taskId } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
+    onSuccess: () => {
+      setCheer("נשלח להורה. כל הכבוד!");
+      qc.invalidateQueries({ queryKey: ["board"] });
+    },
   });
   const buy = useMutation({
     mutationFn: (item: { title: string; cost: number }) => requestShop({ data: item }),
@@ -88,6 +92,14 @@ function ChildHome({ me }: { me: MyContext }) {
             <Button type="button" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש את המתנה</Button>
           ) : null}
           <TaskList title="מחכה לך היום" tasks={open.slice(0, 2)} action={(id) => done.mutate(id)} busy={done.isPending} />
+          <div className="flex gap-2 overflow-x-auto">
+            {characters.map((c) => (
+              <button key={c.id} type="button" className="shrink-0" onClick={() => { localStorage.setItem("mymojo-character", c.id); location.reload(); }}>
+                <img src={c.src} alt={c.name} className="h-16 w-16 object-contain" />
+              </button>
+            ))}
+          </div>
+          {cheer ? <p className="surface-card p-4 text-center text-lg font-black">{cheer}</p> : null}
         </>
       ) : null}
       {data && tab === "tasks" ? (

@@ -20,6 +20,7 @@ import {
   createGoal,
   cancelGoal,
   deliverGoal,
+  decideShop,
   getBoard,
   listRanges,
   markPaid,
@@ -177,6 +178,10 @@ function Approvals({ children }: { children: Array<{ id: string; name: string }>
       qc.invalidateQueries({ queryKey: ["board"] });
     },
   });
+  const shop = useMutation({
+    mutationFn: (v: { messageId: string; approve: boolean }) => decideShop({ data: v }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["approvals"] }),
+  });
   const rows = boards.data ?? [];
   if (rows.length === 0) return <Empty text="אין משימות שמחכות לאישור." />;
   return (
@@ -188,7 +193,12 @@ function Approvals({ children }: { children: Array<{ id: string; name: string }>
             {task.childName} · {task.kind === "action" ? "אקשן" : "בית"} · {task.repeat_done}/{task.repeat_target}
           </p>
           <div className="mt-3 flex gap-2">
-            {task.shop ? <p className="text-sm font-bold">מחכה להורה בחנות</p> : (
+            {task.shop ? (
+              <>
+                <Button type="button" disabled={shop.isPending} onClick={() => shop.mutate({ messageId: task.id, approve: true })}>אישור</Button>
+                <Button type="button" variant="outline" disabled={shop.isPending} onClick={() => shop.mutate({ messageId: task.id, approve: false })}>לא עכשיו</Button>
+              </>
+            ) : (
               <>
                 <Button type="button" className="tap-target" disabled={decide.isPending} onClick={() => decide.mutate({ taskId: task.id, approve: true })}>
                   אישור

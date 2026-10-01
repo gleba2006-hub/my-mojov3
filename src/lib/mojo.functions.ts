@@ -240,6 +240,18 @@ export const requestShop = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const decideShop = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ messageId: z.string().uuid(), approve: z.boolean() }))
+  .handler(async ({ data, context }) => {
+    const db = await admin();
+    const { data: message } = await db.from("messages").select("id, family_id, body").eq("id", data.messageId).maybeSingle();
+    if (!message) throw new Error("הבקשה לא נמצאה");
+    await assertParent(context.userId, message.family_id);
+    await db.from("messages").update({ body: `${data.approve ? "אושר" : "נדחה"}: ${message.body}` }).eq("id", message.id);
+    return { ok: true };
+  });
+
 export const requestPrize = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ goalId: z.string().uuid() }))
