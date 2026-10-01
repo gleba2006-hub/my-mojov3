@@ -223,6 +223,16 @@ export const cancelGoal = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setPet = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ petId: z.string().min(1).max(20) }))
+  .handler(async ({ data, context }) => {
+    const db = await admin();
+    const me = await childOf(context.userId);
+    await db.from("child_profiles").update({ pet_id: data.petId }).eq("id", me.id);
+    return { ok: true };
+  });
+
 export const setAvatar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ avatarId: z.string().min(2).max(20) }))

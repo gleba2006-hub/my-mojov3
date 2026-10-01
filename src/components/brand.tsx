@@ -69,8 +69,14 @@ export function characterSrc(gender: string | null | undefined, stage: number) {
   return girl ? `/brand/girl-pinka-${n}.png` : `/brand/boy-tree-${n}.png`;
 }
 
-export function petSrc(seed: string) {
-  return seed.length % 2 === 0 ? "/brand/pet-1.png" : "/brand/pet-2.png";
+export const pets = [
+  { id: "1", name: "כוכבון", src: "/brand/pet-1.png" },
+  { id: "2", name: "חתולית", src: "/brand/pet-2.png" },
+  { id: "3", name: "שועל", src: "/brand/pet-3.png" },
+  { id: "4", name: "ענן", src: "/brand/pet-4.png" },
+];
+export function petSrc(id: string | null | undefined) {
+  return pets.find((p) => p.id === id)?.src ?? pets[0]!.src;
 }
 
 export function taskIcon(title: string) {

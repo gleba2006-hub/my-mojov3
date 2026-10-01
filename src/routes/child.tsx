@@ -3,11 +3,11 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
-import { characterSrc, characters, petSrc, taskIcon } from "@/components/brand";
+import { characterSrc, characters, pets, petSrc, taskIcon } from "@/components/brand";
 import { Hero, Jar } from "@/components/mojo-ui";
 import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
-import { completeTask, getBoard, requestPrize, requestShop, setAvatar } from "@/lib/mojo.functions";
+import { completeTask, getBoard, requestPrize, requestShop, setAvatar, setPet } from "@/lib/mojo.functions";
 import { coinsFromXp, shopItems } from "@/lib/shop";
 import { DemoChild } from "@/components/demo-boards";
 import { useDemo } from "@/lib/use-demo";
@@ -39,6 +39,10 @@ function ChildHome({ me }: { me: MyContext }) {
   });
   const buy = useMutation({
     mutationFn: (item: { title: string; cost: number }) => requestShop({ data: item }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
+  });
+  const pet = useMutation({
+    mutationFn: (petId: string) => setPet({ data: { petId } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
   });
   const avatar = useMutation({
@@ -78,7 +82,7 @@ function ChildHome({ me }: { me: MyContext }) {
         <>
           <section className="relative -mx-4 min-h-[68dvh]">
             <img src={characters.find((c) => c.id === data.child.avatar_id)?.src ?? characterSrc(data.child.gender, stageFor(data.child.level))} alt="" className="absolute inset-x-0 bottom-8 mx-auto h-[46dvh] w-auto object-contain drop-shadow-2xl" />
-            <img src={petSrc(data.child.pet_id ?? data.child.name)} alt="" className="absolute bottom-10 start-4 h-20 w-20 object-contain" />
+            <img src={petSrc(data.child.pet_id)} alt="" className="absolute bottom-10 start-4 h-20 w-20 object-contain" />
             <div className="absolute inset-x-4 top-0 flex justify-between">
               <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רמה {data.child.level}</span>
               <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רצף {data.streak}</span>
@@ -99,6 +103,13 @@ function ChildHome({ me }: { me: MyContext }) {
             <Button type="button" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש את המתנה</Button>
           ) : null}
           <TaskList title="מחכה לך היום" tasks={open.slice(0, 2)} action={(id) => done.mutate(id)} busy={done.isPending} />
+          <div className="flex gap-2 overflow-x-auto">
+            {pets.map((p) => (
+              <button key={p.id} type="button" className="shrink-0" onClick={() => pet.mutate(p.id)}>
+                <img src={p.src} alt={p.name} className="h-14 w-14 object-contain" />
+              </button>
+            ))}
+          </div>
           <div className="flex gap-2 overflow-x-auto">
             {characters.map((c) => (
               <button key={c.id} type="button" className="shrink-0" onClick={() => { localStorage.setItem("mymojo-character", c.id); avatar.mutate(c.id); }}>
