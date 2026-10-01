@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame } from "@/components/app-frame";
 import { Button } from "@/components/ui/button";
 import { adminSnapshot, listRanges, setMethodEnabled } from "@/lib/mojo.functions";
+import { MethodGuide } from "@/components/method-guide";
 import { RequireAuth, signOut } from "@/lib/session";
 
 export const Route = createFileRoute("/admin")({
@@ -64,9 +65,25 @@ function AdminHome() {
               ))}
             </ul>
           </section>
-          <p className="surface-card p-4 text-sm text-muted-foreground">
-            מנויים: הטבלה קיימת, בלי מחירים. Stripe יחובר אחרי שמות התוכניות והמחירים.
-          </p>
+          <MethodGuide />
+          <section className="surface-card p-4">
+            <h2 className="mb-2 font-black">מסלולים לפי טווח</h2>
+            <ul className="flex flex-col gap-2">
+              {(ranges.data?.ranges ?? []).map((range) => {
+                const paths = (ranges.data?.paths ?? []).filter((path) => path.range_id === range.id);
+                return (
+                  <li key={range.id} className="text-sm">
+                    <span className="font-black">{range.label}</span>
+                    <span className="text-muted-foreground"> · {range.task_count} משימות · {paths.map((path) => path.name).join(" / ") || "בלי מסלול"}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+          <section className="surface-card p-4">
+            <h2 className="font-black">שלב 7 · מנויים</h2>
+            <p className="mt-1 text-sm text-muted-foreground">הטבלה קיימת. Stripe יחובר אחרי שמות התוכניות, המחירים, ומה נשאר חינמי.</p>
+          </section>
         </>
       ) : (
         <p className="text-sm text-muted-foreground">טוענים…</p>

@@ -217,7 +217,7 @@ function ChildrenStep({ familyId, familyName }: { familyId: string; familyName: 
               onClick={() => navigate({ to: "/parent" })}
               className="h-11 text-base font-bold"
             >
-              סיום
+              סיום · לבחירת שיטת חינוך
             </Button>
           ) : null}
         </div>
