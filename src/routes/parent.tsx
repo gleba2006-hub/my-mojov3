@@ -217,7 +217,7 @@ function KidCard({ child, onGoal }: { child: { id: string; name: string; connect
           <p className="text-sm text-muted-foreground">{open} פתוחות · {waiting} ממתינות</p>
         </div>
       </section>
-      <Jar amount={board.data?.balance ?? 0} caption={child.connected ? "מכשיר מחובר" : "עוד בלי מכשיר"} />
+      <Jar amount={Math.max(0, board.data?.balance ?? 0)} caption={child.connected ? "מכשיר מחובר" : "עוד בלי מכשיר"} />
       <Hero
         eyebrow={goal ? `${methodName} · ${(goal.method_config as { pathName?: string }).pathName ?? ""}` : "אין מתנה פעילה"}
         title={goal?.title ?? "פותחים מתנה"}
@@ -582,7 +582,7 @@ function Shop({ children }: { children: Array<{ id: string; name: string }> }) {
           <li key={goal.id} className="surface-card p-4">
             <p className="font-black">{goal.title}</p>
             <p className="text-sm text-muted-foreground">
-              {goal.childName} · {goal.price_ils ?? 0} ₪ · {goal.status === "completed" ? "הושגה" : "בדרך"}
+              {goal.childName} · {goal.price_ils ?? 0} ₪ · {goal.status === "completed" ? "הושגה" : goal.status === "cancelled" ? "נסגרה" : "בדרך"}
             </p>
             {goal.status === "completed" && !delivered ? (
               <Button type="button" className="mt-3" disabled={give.isPending} onClick={() => give.mutate(goal.id)}>

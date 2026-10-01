@@ -54,7 +54,8 @@ function ChildHome({ me }: { me: MyContext }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
   });
   const data = board.data;
-  const goal = data?.goals.find((g) => g.status === "active") ?? data?.goals[0];
+  const goal = data?.goals.find((g) => g.status === "active")
+    ?? data?.goals.find((g) => g.status === "completed" && !(g.method_config as { delivered?: boolean }).delivered);
   const approved = (data?.tasks ?? []).filter((t) => t.advances_goal && t.status === "approved").length;
   const target = Number((goal?.method_config as { taskTarget?: number } | null)?.taskTarget ?? 0);
   const pocket = goal?.method_id === "pocket_money";
