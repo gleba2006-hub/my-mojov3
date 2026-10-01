@@ -7,17 +7,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "MyMojo — משימות, נקודות ומתנות למשפחה" },
-      {
-        name: "description",
-        content:
-          "הורים מגדירים משימות ומתנות, ילדים משלימים משימות, צוברים נקודות ניסיון ומתקדמים למטרה.",
-      },
-      { property: "og:title", content: "MyMojo — משימות, נקודות ומתנות למשפחה" },
-      {
-        property: "og:description",
-        content:
-          "הורים מגדירים משימות ומתנות, ילדים משלימים משימות, צוברים נקודות ניסיון ומתקדמים למטרה.",
-      },
+      { name: "description", content: "הורים מגדירים משימות ומתנות, ילדים משלימים ומקדמים את המתנה." },
     ],
   }),
   component: Index,
@@ -26,33 +16,20 @@ export const Route = createFileRoute("/")({
 function Index() {
   const methods = listMethods();
   const navigate = useNavigate();
-
   return (
-    <main className="safe-pad min-h-screen gradient-hero">
+    <main className="safe-pad min-h-[100dvh] bg-cover bg-center" style={{ backgroundImage: "url(/brand/bg-parent-home.png)" }}>
       <LogoSplash />
-      <div className="mx-auto w-full max-w-md px-5 pb-16 pt-12">
+      <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-5 pb-10 pt-8">
         <header className="text-center">
-          <LogoMark className="mx-auto h-14" />
-          <h1 className="mt-6 text-4xl font-black leading-tight text-foreground">
-            משימות שהופכות למתנות
-          </h1>
-          <p className="mt-3 text-base text-muted-foreground">
-            הורים מגדירים משימות ומטרות, הילדים משלימים, צוברים נקודות ניסיון ומתקדמים צעד-צעד
-            למתנה.
-          </p>
+          <LogoMark className="mx-auto h-16" />
+          <h1 className="mt-5 text-4xl font-black leading-none">משימות שהופכות למתנות</h1>
+          <p className="mt-3 text-base font-bold">בוחרים שיטה, פותחים מתנה, והילד רואה את הדרך.</p>
         </header>
-
         <nav aria-label="כניסה" className="mt-8 flex flex-col gap-3">
-          <Link
-            to="/register"
-            className="tap-target flex items-center justify-center rounded-2xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground shadow-[var(--shadow-pop)]"
-          >
+          <Link to="/register" className="tap-target flex items-center justify-center rounded-full bg-primary px-4 text-lg font-black text-primary-foreground shadow-[var(--shadow-pop)]">
             הרשמה להורים
           </Link>
-          <Link
-            to="/login"
-            className="tap-target flex items-center justify-center rounded-2xl border-2 border-primary px-4 py-3 text-base font-bold text-foreground"
-          >
+          <Link to="/login" className="tap-target flex items-center justify-center rounded-full bg-card px-4 text-lg font-black">
             כניסה
           </Link>
           <button
@@ -61,40 +38,19 @@ function Index() {
               startDemo("parent");
               navigate({ to: "/parent" });
             }}
-            className="tap-target rounded-2xl bg-xp px-4 py-3 text-base font-black text-xp-foreground"
+            className="tap-target rounded-full bg-xp px-4 text-lg font-black text-xp-foreground"
           >
-            DEMO
+            לראות דמו
           </button>
-          <Link
-            to="/join"
-            className="tap-target flex items-center justify-center text-sm font-bold text-primary"
-          >
-            ילד/ה? חיבור עם קוד
-          </Link>
+          <Link to="/join" className="tap-target text-center text-sm font-black text-primary">ילד/ה? חיבור עם קוד</Link>
         </nav>
-
-        <section className="mt-10">
-          <h2 className="mb-3 text-lg font-bold text-foreground">שלוש שיטות חינוכיות</h2>
-          <ul className="flex flex-col gap-3">
-            {methods.map((method) => (
-              <li key={method.id} className="surface-card p-4">
-                <p className="text-base font-bold text-foreground">{method.name}</p>
-                <p className="mt-0.5 text-sm font-medium text-accent-foreground">
-                  {method.tagline}
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {method.description}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="surface-card mt-8 p-4">
-          <h2 className="text-base font-bold text-foreground">אפשר להציץ בלי הרשמה</h2>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            DEMO פותח לוח הורה עם נועה ואיתי, ומעבר ללוח הילד עם משימות לדוגמה.
-          </p>
+        <section className="mt-8 flex flex-col gap-2">
+          {methods.map((method) => (
+            <article key={method.id} className="rounded-[28px] bg-card/90 p-4 backdrop-blur">
+              <h2 className="font-black">{method.name}</h2>
+              <p className="mt-1 text-sm">{method.tagline}</p>
+            </article>
+          ))}
         </section>
       </div>
     </main>

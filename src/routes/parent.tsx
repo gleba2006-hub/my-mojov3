@@ -72,7 +72,17 @@ function ParentHome({ me }: { me: MyContext }) {
         { id: "more", label: "עוד" },
       ]}
     >
-      {tab === "home" ? <Kids children={children.data ?? []} /> : null}
+      {tab === "home" ? (
+        <>
+          {pending.data ? (
+            <button type="button" onClick={() => setTab("approve")} className="surface-card p-4 text-start">
+              <p className="text-2xl font-black">{pending.data} מחכים לך</p>
+              <p className="text-sm text-muted-foreground">אישור משימות ובקשות חנות</p>
+            </button>
+          ) : null}
+          <Kids children={children.data ?? []} />
+        </>
+      ) : null}
       {tab === "approve" ? <Approvals children={children.data ?? []} /> : null}
       {tab === "goal" ? <GoalMaker children={children.data ?? []} /> : null}
       {tab === "more" ? (
