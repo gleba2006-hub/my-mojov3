@@ -229,6 +229,14 @@ function KidCard({ child, onGoal }: { child: { id: string; name: string; connect
         {waiting ? `${waiting} מחכות לאישור. ` : ""}
         {!goal ? "הצעד הבא: בוחרים שיטה ופותחים מתנה." : pocket ? "הצעד הבא: משימות ממלאות את הצנצנת." : "הצעד הבא: מאשרים משימות שסופרות למתנה."}
       </p>
+      <ul className="flex flex-col gap-2">
+        {(board.data?.tasks ?? []).filter((task) => task.status === "active" || task.status === "pending_approval").slice(0, 4).map((task) => (
+          <li key={task.id} className="surface-card px-4 py-3">
+            <p className="font-bold">{task.title}</p>
+            <p className="text-xs text-muted-foreground">{task.status === "pending_approval" ? "מחכה לאישור" : "פתוחה"} · {task.advances_goal ? "סופר למתנה" : "רק נקודות"}</p>
+          </li>
+        ))}
+      </ul>
       <section className="surface-card p-4">
         <XpMeter xp={board.data?.child.xp ?? 0} level={board.data?.child.level ?? 1} />
         <p className="mt-2 text-sm font-bold">{board.data?.coins ?? 0} מטבעות · רצף {board.data?.streak ?? 0}</p>

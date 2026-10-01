@@ -579,19 +579,31 @@ export const adminSnapshot = createServerFn({ method: "GET" })
     const db = await admin();
     const { data: role } = await db.from("user_roles").select("id").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
     if (!role) throw new Error("אין הרשאה");
-    const [families, children, goals, methods, tasks] = await Promise.all([
+    const [families, children, goals, methods, tasks, liveTasks, familyRows, childRows] = await Promise.all([
       db.from("families").select("id", { count: "exact", head: true }),
       db.from("child_profiles").select("id", { count: "exact", head: true }),
       db.from("goals").select("id", { count: "exact", head: true }),
       db.from("education_methods").select("id, name, enabled, tagline").order("sort_order"),
       db.from("reward_tasks").select("id", { count: "exact", head: true }),
+      db.from("tasks").select("status"),
+      db.from("families").select("id, name").order("created_at", { ascending: false }).limit(12),
+      db.from("child_profiles").select("id, name, family_id, level").order("created_at", { ascending: false }).limit(20),
     ]);
+    const counts = { active: 0, pending_approval: 0, approved: 0 };
+    for (const row of liveTasks.data ?? []) {
+      if (row.status === "active") counts.active += 1;
+      if (row.status === "pending_approval") counts.pending_approval += 1;
+      if (row.status === "approved") counts.approved += 1;
+    }
     return {
       families: families.count ?? 0,
       children: children.count ?? 0,
       goals: goals.count ?? 0,
       catalog: tasks.count ?? 0,
       methods: methods.data ?? [],
+      taskCounts: counts,
+      familyRows: familyRows.data ?? [],
+      childRows: childRows.data ?? [],
     };
   });
 

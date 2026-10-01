@@ -33,6 +33,7 @@ function AdminHome() {
       onSignOut={() => signOut()}
       tabs={[
         { id: "home", label: "סקירה" },
+        { id: "families", label: "משפחות" },
         { id: "methods", label: "שיטות" },
         { id: "catalog", label: "קטלוג" },
         { id: "assets", label: "נכסים" },
@@ -47,6 +48,9 @@ function AdminHome() {
             ["ילדים", data.children],
             ["מטרות", data.goals],
             ["משימות בקטלוג", data.catalog],
+            ["פתוחות", data.taskCounts.active],
+            ["ממתינות", data.taskCounts.pending_approval],
+            ["אושרו", data.taskCounts.approved],
           ].map(([label, value]) => (
             <div key={String(label)} className="surface-card p-4">
               <dt className="text-sm text-muted-foreground">{label}</dt>
@@ -54,6 +58,18 @@ function AdminHome() {
             </div>
           ))}
         </dl>
+      ) : null}
+      {tab === "families" && data ? (
+        <ul className="flex flex-col gap-2">
+          {data.familyRows.map((family) => (
+            <li key={family.id} className="surface-card p-4">
+              <p className="font-black">{family.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {data.childRows.filter((child) => child.family_id === family.id).map((child) => `${child.name} · רמה ${child.level}`).join(" · ") || "בלי ילדים"}
+              </p>
+            </li>
+          ))}
+        </ul>
       ) : null}
       {tab === "methods" && data ? (
         <>
