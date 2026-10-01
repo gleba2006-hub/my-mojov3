@@ -135,27 +135,6 @@ export type Database = {
           },
         ]
       }
-      code_attempts: {
-        Row: {
-          bucket: string
-          created_at: string
-          id: string
-          key_hash: string
-        }
-        Insert: {
-          bucket: string
-          created_at?: string
-          id?: string
-          key_hash: string
-        }
-        Update: {
-          bucket?: string
-          created_at?: string
-          id?: string
-          key_hash?: string
-        }
-        Relationships: []
-      }
       education_methods: {
         Row: {
           created_at: string
@@ -643,11 +622,6 @@ export type Database = {
           title: string
           updated_at: string
           xp_value: number
-          goal_id: string | null
-          category: string | null
-          repeat_target: number
-          repeat_done: number
-          advances_goal: boolean
         }
         Insert: {
           child_id?: string | null
@@ -661,11 +635,6 @@ export type Database = {
           title: string
           updated_at?: string
           xp_value?: number
-          goal_id?: string | null
-          category?: string | null
-          repeat_target?: number
-          repeat_done?: number
-          advances_goal?: boolean
         }
         Update: {
           child_id?: string | null
@@ -679,11 +648,6 @@ export type Database = {
           title?: string
           updated_at?: string
           xp_value?: number
-          goal_id?: string | null
-          category?: string | null
-          repeat_target?: number
-          repeat_done?: number
-          advances_goal?: boolean
         }
         Relationships: [
           {
@@ -701,37 +665,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-
-      child_allowances: {
-        Row: { child_id: string; period: string; base_amount: number; payout_day: number; home_amount: number; action_amount: number; updated_at: string }
-        Insert: { child_id: string; period?: string; base_amount?: number; payout_day?: number; home_amount?: number; action_amount?: number; updated_at?: string }
-        Update: { child_id?: string; period?: string; base_amount?: number; payout_day?: number; home_amount?: number; action_amount?: number; updated_at?: string }
-        Relationships: []
-      }
-      reward_price_ranges: {
-        Row: { id: string; label: string; min_ils: number; max_ils: number | null; task_count: number; sort_order: number }
-        Insert: { id: string; label: string; min_ils: number; max_ils?: number | null; task_count: number; sort_order?: number }
-        Update: { id?: string; label?: string; min_ils?: number; max_ils?: number | null; task_count?: number; sort_order?: number }
-        Relationships: []
-      }
-      reward_paths: {
-        Row: { id: string; range_id: string; path_index: number; name: string }
-        Insert: { id: string; range_id: string; path_index: number; name: string }
-        Update: { id?: string; range_id?: string; path_index?: number; name?: string }
-        Relationships: []
-      }
-      reward_path_tasks: {
-        Row: { path_id: string; task_id: string; sort_order: number }
-        Insert: { path_id: string; task_id: string; sort_order: number }
-        Update: { path_id?: string; task_id?: string; sort_order?: number }
-        Relationships: []
-      }
-      reward_tasks: {
-        Row: { id: string; title: string; category: string; kind: Database["public"]["Enums"]["task_kind"] }
-        Insert: { id: string; title: string; category: string; kind: Database["public"]["Enums"]["task_kind"] }
-        Update: { id?: string; title?: string; category?: string; kind?: Database["public"]["Enums"]["task_kind"] }
-        Relationships: []
       }
       user_roles: {
         Row: {
