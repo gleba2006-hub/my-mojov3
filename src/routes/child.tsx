@@ -103,8 +103,14 @@ function ChildHome({ me }: { me: MyContext }) {
           ) : (
             <p className="surface-card p-4 text-center font-black">ההורים עוד בוחרים מתנה. אפשר כבר לסמן משימות.</p>
           )}
-          {goal?.status === "completed" && !(goal.method_config as { requested?: boolean }).requested ? (
-            <Button type="button" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש את המתנה</Button>
+          {goal?.status === "completed" && !(goal.method_config as { delivered?: boolean }).delivered && !(goal.method_config as { requested?: boolean }).requested ? (
+            <Button type="button" className="h-11 font-black" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש את המתנה</Button>
+          ) : null}
+          {goal && (goal.method_config as { requested?: boolean }).requested && !(goal.method_config as { delivered?: boolean }).delivered ? (
+            <p className="surface-card p-4 text-center font-black">ביקשת את {goal.title}. מחכים שההורה ימסור.</p>
+          ) : null}
+          {(goal?.method_config as { delivered?: boolean } | undefined)?.delivered ? (
+            <p className="surface-card p-4 text-center font-black">המתנה נמסרה. אפשר לפתוח מתנה חדשה.</p>
           ) : null}
           <TaskList title="מחכה לך היום" tasks={open.slice(0, 2)} action={(id) => done.mutate(id)} busy={done.isPending} />
           <div className="flex gap-2 overflow-x-auto">
@@ -188,7 +194,7 @@ function TaskList({
   busy,
 }: {
   title: string;
-  tasks: Array<{ id: string; title: string; kind: string; category: string | null; status?: string }>;
+  tasks: Array<{ id: string; title: string; kind: string; category: string | null; status?: string; advances_goal?: boolean }>;
   action?: (id: string) => void;
   busy?: boolean;
 }) {
@@ -203,7 +209,7 @@ function TaskList({
               <img src={taskIcon(task.title)} alt="" className="h-12 w-12 object-contain" />
               <div>
                 <p className="font-bold">{task.title}</p>
-                <p className="text-xs text-muted-foreground">{task.kind === "action" ? "אקשן" : "בית"} · {task.category}</p>
+                <p className="text-xs text-muted-foreground">{task.kind === "action" ? "אקשן" : "בית"} · {task.advances_goal ? "סופר למתנה" : "רק נקודות"}</p>
               </div>
             </div>
             {action ? (

@@ -84,6 +84,7 @@ function ParentHome({ me }: { me: MyContext }) {
               <p className="text-sm text-muted-foreground">אישור משימות ובקשות חנות</p>
             </button>
           ) : null}
+          <PrizeReady children={children.data ?? []} />
           <Kids children={children.data ?? []} onMore={() => setTab("more")} onGoal={() => setTab("goal")} />
         </>
       ) : null}
@@ -109,6 +110,43 @@ function ParentHome({ me }: { me: MyContext }) {
         </>
       ) : null}
     </AppFrame>
+  );
+}
+
+
+function PrizeReady({ children }: { children: Array<{ id: string; name: string }> }) {
+  const qc = useQueryClient();
+  const boards = useQuery({
+    queryKey: ["prizes", children.map((c) => c.id).join(",")],
+    enabled: children.length > 0,
+    queryFn: () => Promise.all(children.map(async (c) => ({ child: c, board: await getBoard({ data: { childId: c.id } }) }))),
+  });
+  const give = useMutation({
+    mutationFn: (goalId: string) => deliverGoal({ data: { goalId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["prizes"] }),
+  });
+  const rows = (boards.data ?? []).flatMap(({ child, board }) =>
+    board.goals
+      .filter((g) => g.status === "completed" && !(g.method_config as { delivered?: boolean }).delivered)
+      .map((g) => ({ ...g, childName: child.name })),
+  );
+  if (rows.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-2">
+      {rows.map((goal) => {
+        const asked = Boolean((goal.method_config as { requested?: boolean }).requested);
+        return (
+          <article key={goal.id} className="surface-card p-4">
+            <p className="text-xs font-bold text-primary">{asked ? "הילד ביקש את המתנה" : "המתנה הושגה"}</p>
+            <h2 className="text-xl font-black">{goal.title}</h2>
+            <p className="text-sm text-muted-foreground">{goal.childName} · {goal.price_ils ?? 0} ₪</p>
+            <Button type="button" className="mt-3 h-11 w-full font-black" disabled={give.isPending} onClick={() => give.mutate(goal.id)}>
+              סמן כנמסר
+            </Button>
+          </article>
+        );
+      })}
+    </section>
   );
 }
 
