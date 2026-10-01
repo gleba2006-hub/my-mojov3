@@ -30,7 +30,9 @@ function emit() {
 
 export function subscribeDemo(fn: () => void) {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 const kids: DemoKid[] = [
@@ -74,10 +76,13 @@ const kids: DemoKid[] = [
 type Session = { view: "parent" | "child"; childId: string; chest: string | null };
 
 let session: Session | null = null;
+let rawCache = "";
 
 function read() {
   if (typeof window === "undefined") return session;
-  const raw = sessionStorage.getItem("mymojo-demo");
+  const raw = sessionStorage.getItem("mymojo-demo") ?? "";
+  if (raw === rawCache) return session;
+  rawCache = raw;
   if (!raw) return (session = null);
   try {
     session = JSON.parse(raw) as Session;
@@ -89,8 +94,9 @@ function read() {
 
 function write(next: Session | null) {
   session = next;
+  rawCache = next ? JSON.stringify(next) : "";
   if (typeof window !== "undefined") {
-    if (next) sessionStorage.setItem("mymojo-demo", JSON.stringify(next));
+    if (next) sessionStorage.setItem("mymojo-demo", rawCache);
     else sessionStorage.removeItem("mymojo-demo");
   }
   emit();

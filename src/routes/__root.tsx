@@ -48,6 +48,9 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
         <p className="mt-2 text-sm text-muted-foreground">
           משהו השתבש. אפשר לנסות שוב, או לחזור הביתה.
         </p>
+        {error instanceof Error && error.message ? (
+          <p className="mt-2 text-xs text-muted-foreground" dir="ltr">{error.message}</p>
+        ) : null}
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             type="button"
