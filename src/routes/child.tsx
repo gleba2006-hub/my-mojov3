@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
+import { Hero, Jar } from "@/components/mojo-ui";
 import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
 import { completeTask, getBoard, requestPrize } from "@/lib/mojo.functions";
@@ -23,6 +25,7 @@ function ChildGate() {
 
 function ChildHome({ me }: { me: MyContext }) {
   const qc = useQueryClient();
+  const [tab, setTab] = useState("today");
   const board = useQuery({ queryKey: ["board", me.childId], queryFn: () => getBoard({ data: {} }) });
   const done = useMutation({
     mutationFn: (taskId: string) => completeTask({ data: { taskId } }),
@@ -41,49 +44,52 @@ function ChildHome({ me }: { me: MyContext }) {
   const closed = (data?.tasks ?? []).filter((t) => t.status === "approved");
 
   return (
-    <AppFrame title={data?.child.name || "המשימות שלי"} kicker="לוח ילד" tab="home" onTab={() => undefined} onSignOut={() => signOut()} tabs={[{ id: "home", label: "הבית" }]}>
-      {data ? (
+    <AppFrame
+      title={data?.child.name || "המשימות שלי"}
+      kicker="לוח ילד"
+      tab={tab}
+      onTab={setTab}
+      onSignOut={() => signOut()}
+      tabs={[
+        { id: "today", label: "היום" },
+        { id: "prize", label: "מתנה" },
+        { id: "jar", label: "צנצנת" },
+      ]}
+    >
+      {!data ? <p className="text-center text-sm text-muted-foreground">טוענים את הלוח…</p> : null}
+      {data && tab === "today" ? (
         <>
           <section className="surface-card p-4">
-            <p className="text-sm font-bold text-accent-foreground">דמות בשלב {stageFor(data.child.level)}</p>
-            <h2 className="text-xl font-black">{data.child.gender === "boy" ? "גיבור הבית" : "גיבורת הבית"}</h2>
-            <div className="mt-3">
-              <XpMeter xp={data.child.xp} level={data.child.level} />
-            </div>
+            <XpMeter xp={data.child.xp} level={data.child.level} />
             <div className="mt-3">
               <AvatarPlate stage={stageFor(data.child.level)} />
             </div>
             <LevelUp level={data.child.level} name={data.child.name} />
           </section>
-          {goal ? (
-            <section className="surface-card p-4">
-              <p className="text-sm text-muted-foreground">{(goal.method_config as { pathName?: string }).pathName}</p>
-              <h2 className="text-xl font-black">{goal.title}</h2>
-              <p className="mt-1 text-sm font-bold">{approved}/{target || "?"} משימות שסופרות למתנה</p>
-              <div className="mt-2 h-3 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${target ? Math.min(100, (approved / target) * 100) : 0}%` }} />
-              </div>
-              {goal.status === "completed" ? <p className="mt-2 font-black text-success-foreground">המתנה הושגה</p> : null}
-              {goal.status === "completed" && !(goal.method_config as { requested?: boolean }).requested ? (
-                <Button type="button" className="mt-3" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש מההורה</Button>
-              ) : null}
-              {(goal.method_config as { requested?: boolean }).requested ? <p className="mt-2 text-sm font-bold">ביקשת. מחכים להורה.</p> : null}
-              {(goal.method_config as { delivered?: boolean }).delivered ? <p className="mt-2 text-sm font-bold text-success-foreground">המתנה נמסרה</p> : null}
-            </section>
-          ) : (
-            <p className="surface-card p-4 text-sm text-muted-foreground">ההורה עוד לא פתח מטרה.</p>
-          )}
-          {data.allowance ? (
-            <section className="surface-card p-4">
-              <h2 className="font-black">הצנצנת</h2>
-              <p className="text-3xl font-black">{data.balance} ₪</p>
-              <p className="text-sm text-muted-foreground">
-                בסיס {data.allowance.base_amount} ₪ {data.allowance.period === "weekly" ? "בשבוע" : "בחודש"}
-              </p>
-            </section>
-          ) : null}
           <TaskList title="לעשות היום" tasks={open} action={(id) => done.mutate(id)} busy={done.isPending} />
           <TaskList title="מחכה להורה" tasks={waiting} />
+          {open.length === 0 && waiting.length === 0 ? <p className="surface-card p-4 text-sm">אין משימות פתוחות.</p> : null}
+        </>
+      ) : null}
+      {data && tab === "prize" ? (
+        goal ? (
+          <Hero
+            eyebrow={(goal.method_config as { pathName?: string }).pathName ?? "המתנה"}
+            title={goal.title}
+            detail={`${approved}/${target || "?"} משימות שסופרות`}
+            progress={target ? (approved / target) * 100 : 0}
+          />
+        ) : (
+          <p className="surface-card p-4 text-sm">ההורה עוד לא פתח מטרה.</p>
+        )
+      ) : null}
+      {data && tab === "prize" && goal?.status === "completed" && !(goal.method_config as { requested?: boolean }).requested ? (
+        <Button type="button" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש מההורה</Button>
+      ) : null}
+      {data && tab === "prize" && (goal?.method_config as { requested?: boolean } | undefined)?.requested ? <p className="text-sm font-bold">ביקשת. מחכים להורה.</p> : null}
+      {data && tab === "jar" ? (
+        <>
+          <Jar amount={data.balance} caption={data.allowance ? `בסיס ${data.allowance.base_amount} ₪ ${data.allowance.period === "weekly" ? "בשבוע" : "בחודש"}` : "עוד בלי דמי כיס"} />
           <TaskList title="נסגרו" tasks={closed} />
           {data.messages.length > 0 ? (
             <section className="surface-card p-4">
@@ -96,9 +102,7 @@ function ChildHome({ me }: { me: MyContext }) {
             </section>
           ) : null}
         </>
-      ) : (
-        <p className="text-center text-sm text-muted-foreground">טוענים את הלוח…</p>
-      )}
+      ) : null}
     </AppFrame>
   );
 }

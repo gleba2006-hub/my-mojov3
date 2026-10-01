@@ -28,6 +28,7 @@ import {
   setRepeats,
 } from "@/lib/mojo.functions";
 import { AvatarPlate } from "@/components/avatar-plate";
+import { Chip, ChipRow, Hero, Jar } from "@/components/mojo-ui";
 import { DemoParent } from "@/components/demo-boards";
 import { useDemo } from "@/lib/use-demo";
 import { listMethods } from "@/methods/registry";
@@ -64,28 +65,36 @@ function ParentHome({ me }: { me: MyContext }) {
       onSignOut={() => signOut()}
       tabs={[
         { id: "home", label: "בית" },
-        { id: "approve", label: "אישורים", ...(pending.data ? { badge: pending.data } : {}) },
+        { id: "approve", label: "אישור", ...(pending.data ? { badge: pending.data } : {}) },
         { id: "goal", label: "מטרה" },
-        { id: "shop", label: "חנות" },
-        { id: "family", label: "משפחה" },
+        { id: "more", label: "עוד" },
       ]}
     >
       {tab === "home" ? <Kids children={children.data ?? []} /> : null}
       {tab === "approve" ? <Approvals children={children.data ?? []} /> : null}
       {tab === "goal" ? <GoalMaker children={children.data ?? []} /> : null}
-      {tab === "shop" ? <Shop children={children.data ?? []} /> : null}
-      {tab === "family" ? <FamilyTab familyId={me.family!.id} children={children.data ?? []} /> : null}
+      {tab === "more" ? (
+        <>
+          <Shop children={children.data ?? []} />
+          <FamilyTab familyId={me.family!.id} children={children.data ?? []} />
+        </>
+      ) : null}
     </AppFrame>
   );
 }
 
 function Kids({ children }: { children: Array<{ id: string; name: string; connected: boolean }> }) {
-  if (children.length === 0) return <Empty text="עוד אין ילדים. מוסיפים בטאב משפחה." />;
+  const [id, setId] = useState(children[0]?.id ?? "");
+  const current = children.find((c) => c.id === id) ?? children[0];
+  if (!current) return <Empty text="עוד אין ילדים. מוסיפים בטאב עוד." />;
   return (
     <div className="flex flex-col gap-3">
-      {children.map((child) => (
-        <KidCard key={child.id} child={child} />
-      ))}
+      <ChipRow>
+        {children.map((child) => (
+          <Chip key={child.id} label={child.name} on={child.id === current.id} onClick={() => setId(child.id)} />
+        ))}
+      </ChipRow>
+      <KidCard child={current} />
     </div>
   );
 }
@@ -96,38 +105,31 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
   const done = (board.data?.tasks ?? []).filter((t) => t.advances_goal && t.status === "approved").length;
   const target = Number((goal?.method_config as { taskTarget?: number } | null)?.taskTarget ?? 0);
   return (
-    <article className="surface-card p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-black">{child.name}</h2>
-          <p className="text-sm text-muted-foreground">
-            {child.connected ? "מכשיר מחובר" : "עוד בלי מכשיר"} · שלב דמות {stageFor(board.data?.child.level ?? 1)}
-          </p>
+    <div className="flex flex-col gap-3">
+      <Jar amount={board.data?.balance ?? 0} caption={child.connected ? "מכשיר מחובר" : "עוד בלי מכשיר"} />
+      <Hero
+        eyebrow={(goal?.method_config as { pathName?: string } | undefined)?.pathName ?? "אין מטרה"}
+        title={goal?.title ?? "פותחים מטרה"}
+        detail={goal ? `${done}/${target || "?"} משימות למתנה` : "בטאב מטרה"}
+        progress={target ? (done / target) * 100 : 0}
+      />
+      <section className="surface-card p-4">
+        <XpMeter xp={board.data?.child.xp ?? 0} level={board.data?.child.level ?? 1} />
+        <div className="mt-3">
+          <AvatarPlate stage={stageFor(board.data?.child.level ?? 1)} />
         </div>
-        <p className="text-sm font-black text-primary">{board.data ? `${board.data.balance} ₪` : ""}</p>
-      </div>
-      {board.data ? <XpMeter xp={board.data.child.xp} level={board.data.child.level} /> : null}
-      <div className="mt-3">
-        <AvatarPlate stage={stageFor(board.data?.child.level ?? 1)} />
-      </div>
-      {goal ? (
-        <p className="mt-3 text-sm font-bold">
-          {goal.title}: {done}/{target || "?"} במסלול {(goal.method_config as { pathName?: string }).pathName ?? ""}
-        </p>
-      ) : (
-        <p className="mt-3 text-sm text-muted-foreground">אין מטרה פעילה</p>
-      )}
-      {board.data?.ledger.length ? (
-        <ul className="mt-3 flex flex-col gap-1">
-          {board.data.ledger.slice(0, 3).map((row) => (
-            <li key={row.created_at} className="flex justify-between text-xs text-muted-foreground">
-              <span>{row.reason}</span>
-              <span>{row.type === "earn" ? "+" : "-"}{row.amount} ₪</span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </article>
+        {board.data?.ledger.length ? (
+          <ul className="mt-3 flex flex-col gap-1">
+            {board.data.ledger.slice(0, 3).map((row) => (
+              <li key={row.created_at} className="flex justify-between text-xs text-muted-foreground">
+                <span>{row.reason}</span>
+                <span>{row.type === "earn" ? "+" : "-"}{row.amount} ₪</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
+    </div>
   );
 }
 

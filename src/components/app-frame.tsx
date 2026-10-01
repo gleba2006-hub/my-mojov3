@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
 
 export function AppFrame({
   title,
@@ -20,20 +19,20 @@ export function AppFrame({
 }) {
   return (
     <div className="safe-pad min-h-[100dvh] gradient-hero">
-      <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col px-4 pb-28 pt-5">
-        <header className="mb-5 flex items-end justify-between gap-3">
-          <div>
-            <p className="text-sm font-bold text-primary">{kicker ?? "MyMojo"}</p>
-            <h1 className="text-2xl font-black leading-tight text-foreground">{title}</h1>
+      <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col px-4 pb-28 pt-4">
+        <header className="mb-4 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-primary">{kicker ?? "MyMojo"}</p>
+            <h1 className="truncate text-2xl font-black leading-tight text-foreground">{title}</h1>
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={onSignOut} className="tap-target">
+          <button type="button" onClick={onSignOut} className="tap-target rounded-full bg-card px-4 text-sm font-bold text-muted-foreground">
             יציאה
-          </Button>
+          </button>
         </header>
         <div className="flex flex-1 flex-col gap-4">{children}</div>
       </div>
       <nav
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 px-3 pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur"
+        className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 px-2 pb-[max(0.45rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur"
         aria-label="ניווט"
       >
         <ul className="mx-auto grid max-w-lg gap-1" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
@@ -45,11 +44,11 @@ export function AppFrame({
                   type="button"
                   aria-current={on ? "page" : undefined}
                   onClick={() => onTab(item.id)}
-                  className={`tap-target relative w-full rounded-2xl text-sm font-bold ${on ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                  className={`tap-target relative w-full rounded-2xl text-sm font-black ${on ? "bg-primary text-primary-foreground shadow-[var(--shadow-pop)]" : "text-muted-foreground"}`}
                 >
                   {item.label}
                   {item.badge ? (
-                    <span className="absolute start-2 top-1 rounded-full bg-xp px-1.5 text-[10px] text-xp-foreground">
+                    <span className="absolute start-1 top-1 min-w-5 rounded-full bg-xp px-1 text-[10px] leading-5 text-xp-foreground">
                       {item.badge}
                     </span>
                   ) : null}
@@ -66,12 +65,12 @@ export function AppFrame({
 export function XpMeter({ xp, level }: { xp: number; level: number }) {
   const into = xp % 100;
   return (
-    <div className="surface-card p-4">
-      <div className="mb-2 flex items-end justify-between">
-        <p className="text-sm font-bold text-muted-foreground">רמה {level}</p>
-        <p className="text-sm font-black text-xp-foreground">{into}/100 נקודות</p>
+    <div>
+      <div className="mb-1 flex items-end justify-between">
+        <p className="text-sm font-black">רמה {level}</p>
+        <p className="text-xs font-bold text-muted-foreground">{into}/100</p>
       </div>
-      <div className="h-3 overflow-hidden rounded-full bg-muted" aria-valuemin={0} aria-valuemax={100} aria-valuenow={into} role="progressbar">
+      <div className="h-2.5 overflow-hidden rounded-full bg-muted" aria-valuemin={0} aria-valuemax={100} aria-valuenow={into} role="progressbar">
         <div className="h-full rounded-full bg-xp" style={{ width: `${into}%` }} />
       </div>
     </div>
