@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
-import { characterSrc, characters, taskIcon } from "@/components/brand";
+import { characterSrc, characters, petSrc, taskIcon } from "@/components/brand";
 import { Hero, Jar } from "@/components/mojo-ui";
 import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
@@ -78,6 +78,7 @@ function ChildHome({ me }: { me: MyContext }) {
         <>
           <section className="relative -mx-4 min-h-[68dvh]">
             <img src={characters.find((c) => c.id === data.child.avatar_id)?.src ?? characterSrc(data.child.gender, stageFor(data.child.level))} alt="" className="absolute inset-x-0 bottom-8 mx-auto h-[46dvh] w-auto object-contain drop-shadow-2xl" />
+            <img src={petSrc(data.child.pet_id ?? data.child.name)} alt="" className="absolute bottom-10 start-4 h-20 w-20 object-contain" />
             <div className="absolute inset-x-4 top-0 flex justify-between">
               <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רמה {data.child.level}</span>
               <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רצף {data.streak}</span>
@@ -91,7 +92,9 @@ function ChildHome({ me }: { me: MyContext }) {
               detail={`${approved}/${target || "צנצנת"}`}
               progress={target ? (approved / target) * 100 : 0}
             />
-          ) : null}
+          ) : (
+            <p className="surface-card p-4 text-center font-black">ההורים עוד בוחרים מתנה. אפשר כבר לסמן משימות.</p>
+          )}
           {goal?.status === "completed" && !(goal.method_config as { requested?: boolean }).requested ? (
             <Button type="button" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש את המתנה</Button>
           ) : null}

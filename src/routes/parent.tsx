@@ -149,7 +149,7 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
       <Hero
         eyebrow={(goal?.method_config as { pathName?: string } | undefined)?.pathName ?? "אין מטרה"}
         title={goal?.title ?? "פותחים מטרה"}
-        detail={goal ? `${done}/${target || "?"} משימות למתנה` : "בטאב מטרה"}
+        detail={goal ? `${goal.method_id === "pocket_money" ? "דמי כיס" : goal.method_id === "classic" ? "כל משימה" : "מסלול"} · ${done}/${target || "?"}` : "בטאב מטרה"}
         progress={target ? (done / target) * 100 : 0}
       />
       <section className="surface-card p-4">

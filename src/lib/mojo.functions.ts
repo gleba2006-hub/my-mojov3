@@ -330,7 +330,7 @@ export const getBoard = createServerFn({ method: "GET" })
     if (!childId) childId = (await childOf(context.userId)).id;
     const { data: child } = await db
       .from("child_profiles")
-      .select("id, family_id, name, xp, level, gender, user_id, avatar_id")
+      .select("id, family_id, name, xp, level, gender, user_id, avatar_id, pet_id")
       .eq("id", childId)
       .maybeSingle();
     if (!child) throw new Error("הילד לא נמצא");
