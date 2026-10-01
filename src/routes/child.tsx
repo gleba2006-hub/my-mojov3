@@ -111,6 +111,7 @@ function ChildHome({ me }: { me: MyContext }) {
           )}
           {goal?.status === "completed" && !(goal.method_config as { delivered?: boolean }).delivered && !(goal.method_config as { requested?: boolean }).requested ? (
             <Button type="button" className="h-11 font-black" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש את המתנה</Button>
+            {ask.error instanceof Error ? <p className="text-center text-sm font-bold">{ask.error.message}</p> : null}
           ) : null}
           {goal && (goal.method_config as { requested?: boolean }).requested && !(goal.method_config as { delivered?: boolean }).delivered ? (
             <p className="surface-card p-4 text-center font-black">ביקשת את {goal.title}. מחכים שההורה ימסור.</p>

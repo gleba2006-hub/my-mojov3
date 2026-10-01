@@ -281,6 +281,7 @@ function Approvals({ children }: { children: Array<{ id: string; name: string }>
           <p className="text-sm text-muted-foreground">
             {task.childName} · {task.shop ? "חנות" : task.advances_goal ? "סופר למתנה" : "רק נקודות"} · {task.repeat_done}/{task.repeat_target}
           </p>
+          {decide.error instanceof Error ? <p className="mt-2 text-sm font-bold">{decide.error.message}</p> : null}
           <div className="mt-3 flex gap-2">
             {task.shop ? (
               <>
@@ -452,7 +453,8 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
           <Button type="button" onClick={() => basePay.mutate()} disabled={basePay.isPending}>הפקד בסיס</Button>
           <Button type="button" onClick={() => pay.mutate()} disabled={pay.isPending}>סמן כשולם</Button>
         </div>
-        <FormError message={pay.error instanceof Error ? pay.error.message : basePay.error instanceof Error ? basePay.error.message : null} />
+        <FormError message={pay.error instanceof Error ? pay.error.message : basePay.error instanceof Error ? basePay.error.message : allowance.error instanceof Error ? allowance.error.message : null} />
+        {allowance.isSuccess ? <p className="text-sm font-bold">הסכומים נשמרו. חל קדימה.</p> : null}
       </section> : <p className="text-sm font-bold text-muted-foreground">דמי כיס מופיעים רק בשיטת הצנצנת.</p>}
 
       {board.data?.goals[0] ? (
