@@ -24,13 +24,21 @@ import {
   saveAllowance,
   sendNote,
 } from "@/lib/mojo.functions";
+import { DemoParent } from "@/components/demo-boards";
+import { useDemo } from "@/lib/use-demo";
 import { listMethods } from "@/methods/registry";
 import { RequireAuth, signOut } from "@/lib/session";
 
 export const Route = createFileRoute("/parent")({
   head: () => ({ meta: [{ title: "המשפחה — MyMojo" }] }),
-  component: () => <RequireAuth allow={["parent"]}>{(me) => <ParentHome me={me} />}</RequireAuth>,
+  component: ParentGate,
 });
+
+function ParentGate() {
+  const demo = useDemo();
+  if (demo) return <DemoParent />;
+  return <RequireAuth allow={["parent"]}>{(me) => <ParentHome me={me} />}</RequireAuth>;
+}
 
 function ParentHome({ me }: { me: MyContext }) {
   const [tab, setTab] = useState("home");

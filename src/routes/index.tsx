@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { startDemo } from "@/lib/demo";
 import { listMethods } from "@/methods/registry";
 
 export const Route = createFileRoute("/")({
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const methods = listMethods();
+  const navigate = useNavigate();
 
   return (
     <main className="safe-pad min-h-screen gradient-hero">
@@ -53,6 +55,16 @@ function Index() {
           >
             כניסה
           </Link>
+          <button
+            type="button"
+            onClick={() => {
+              startDemo("parent");
+              navigate({ to: "/parent" });
+            }}
+            className="tap-target rounded-2xl bg-xp px-4 py-3 text-base font-black text-xp-foreground"
+          >
+            DEMO
+          </button>
           <Link
             to="/join"
             className="tap-target flex items-center justify-center text-sm font-bold text-primary"
@@ -79,10 +91,9 @@ function Index() {
         </section>
 
         <section className="surface-card mt-8 p-4">
-          <h2 className="text-base font-bold text-foreground">שלב 2 הושלם</h2>
+          <h2 className="text-base font-bold text-foreground">אפשר להציץ בלי הרשמה</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            כניסה, יצירת משפחה, הוספת ילדים, חיבור מכשיר בקוד או QR והזמנת הורה שני. השלב הבא: שיטת
-            מסלולי האקשן.
+            DEMO פותח לוח הורה עם נועה ואיתי, ומעבר ללוח הילד עם משימות לדוגמה.
           </p>
         </section>
       </div>

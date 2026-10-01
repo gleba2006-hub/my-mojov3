@@ -3,13 +3,21 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { Button } from "@/components/ui/button";
 import { completeTask, getBoard } from "@/lib/mojo.functions";
+import { DemoChild } from "@/components/demo-boards";
+import { useDemo } from "@/lib/use-demo";
 import { RequireAuth, signOut } from "@/lib/session";
 import type { MyContext } from "@/lib/family.functions";
 
 export const Route = createFileRoute("/child")({
   head: () => ({ meta: [{ title: "המשימות שלי — MyMojo" }] }),
-  component: () => <RequireAuth allow={["child"]}>{(me) => <ChildHome me={me} />}</RequireAuth>,
+  component: ChildGate,
 });
+
+function ChildGate() {
+  const demo = useDemo();
+  if (demo) return <DemoChild />;
+  return <RequireAuth allow={["child"]}>{(me) => <ChildHome me={me} />}</RequireAuth>;
+}
 
 function ChildHome({ me }: { me: MyContext }) {
   const qc = useQueryClient();
