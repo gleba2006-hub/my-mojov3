@@ -14,16 +14,722 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          child_id: string
+          code: string
+          earned_at: string
+          icon: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          child_id: string
+          code: string
+          earned_at?: string
+          icon?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          child_id?: string
+          code?: string
+          earned_at?: string
+          icon?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievements_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          entity: string | null
+          entity_id: string | null
+          id: string
+          meta: Json
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          meta?: Json
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          meta?: Json
+        }
+        Relationships: []
+      }
+      child_profiles: {
+        Row: {
+          avatar_id: string | null
+          background_id: string | null
+          birth_year: number | null
+          created_at: string
+          family_id: string
+          gender: string | null
+          id: string
+          level: number
+          name: string
+          pet_id: string | null
+          updated_at: string
+          user_id: string | null
+          xp: number
+        }
+        Insert: {
+          avatar_id?: string | null
+          background_id?: string | null
+          birth_year?: number | null
+          created_at?: string
+          family_id: string
+          gender?: string | null
+          id?: string
+          level?: number
+          name: string
+          pet_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          xp?: number
+        }
+        Update: {
+          avatar_id?: string | null
+          background_id?: string | null
+          birth_year?: number | null
+          created_at?: string
+          family_id?: string
+          gender?: string | null
+          id?: string
+          level?: number
+          name?: string
+          pet_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_profiles_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      education_methods: {
+        Row: {
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          sort_order: number
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id: string
+          name: string
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      families: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          invite_code: string | null
+          invite_code_expires_at: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          invite_code?: string | null
+          invite_code_expires_at?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          invite_code?: string | null
+          invite_code_expires_at?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      family_members: {
+        Row: {
+          approved: boolean
+          created_at: string
+          family_id: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          approved?: boolean
+          created_at?: string
+          family_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          approved?: boolean
+          created_at?: string
+          family_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_members_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_progress: {
+        Row: {
+          created_at: string
+          goal_id: string
+          id: string
+          note: string | null
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          goal_id: string
+          id?: string
+          note?: string | null
+          value?: number
+        }
+        Update: {
+          created_at?: string
+          goal_id?: string
+          id?: string
+          note?: string | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_progress_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goals: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          method_config: Json
+          method_id: string
+          price_ils: number | null
+          status: Database["public"]["Enums"]["goal_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          method_config?: Json
+          method_id: string
+          price_ils?: number | null
+          status?: Database["public"]["Enums"]["goal_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          method_config?: Json
+          method_id?: string
+          price_ils?: number | null
+          status?: Database["public"]["Enums"]["goal_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goals_method_id_fkey"
+            columns: ["method_id"]
+            isOneToOne: false
+            referencedRelation: "education_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      link_codes: {
+        Row: {
+          child_id: string
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          used_at: string | null
+        }
+        Insert: {
+          child_id: string
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          id?: string
+          used_at?: string | null
+        }
+        Update: {
+          child_id?: string
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_codes_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string
+          child_id: string | null
+          created_at: string
+          family_id: string
+          id: string
+          read_at: string | null
+          sender_user_id: string | null
+        }
+        Insert: {
+          body: string
+          child_id?: string | null
+          created_at?: string
+          family_id: string
+          id?: string
+          read_at?: string | null
+          sender_user_id?: string | null
+        }
+        Update: {
+          body?: string
+          child_id?: string | null
+          created_at?: string
+          family_id?: string
+          id?: string
+          read_at?: string | null
+          sender_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      money_ledger: {
+        Row: {
+          amount: number
+          child_id: string
+          created_at: string
+          created_by: string | null
+          goal_id: string | null
+          id: string
+          reason: string | null
+          type: Database["public"]["Enums"]["ledger_type"]
+        }
+        Insert: {
+          amount: number
+          child_id: string
+          created_at?: string
+          created_by?: string | null
+          goal_id?: string | null
+          id?: string
+          reason?: string | null
+          type: Database["public"]["Enums"]["ledger_type"]
+        }
+        Update: {
+          amount?: number
+          child_id?: string
+          created_at?: string
+          created_by?: string | null
+          goal_id?: string | null
+          id?: string
+          reason?: string | null
+          type?: Database["public"]["Enums"]["ledger_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "money_ledger_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "money_ledger_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          child_id: string | null
+          created_at: string
+          id: string
+          kind: string | null
+          read_at: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          child_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string | null
+          read_at?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          child_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          locale: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          locale?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          locale?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sub_tasks: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          needs_parent_approval: boolean
+          sort_order: number
+          task_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          needs_parent_approval?: boolean
+          sort_order?: number
+          task_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          needs_parent_approval?: boolean
+          sort_order?: number
+          task_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_tasks_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          family_id: string
+          id: string
+          plan: string
+          provider: string | null
+          provider_customer_id: string | null
+          provider_subscription_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          family_id: string
+          id?: string
+          plan?: string
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          family_id?: string
+          id?: string
+          plan?: string
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: true
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          child_id: string | null
+          created_at: string
+          created_by: string | null
+          family_id: string
+          icon: string | null
+          id: string
+          kind: Database["public"]["Enums"]["task_kind"]
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+          xp_value: number
+        }
+        Insert: {
+          child_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          family_id: string
+          icon?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["task_kind"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+          xp_value?: number
+        }
+        Update: {
+          child_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          family_id?: string
+          icon?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["task_kind"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+          xp_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_access_child: {
+        Args: { _child_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_manage_child: {
+        Args: { _child_id: string; _user_id: string }
+        Returns: boolean
+      }
+      child_family_id: { Args: { _child_id: string }; Returns: string }
+      goal_child_id: { Args: { _goal_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_family_member: {
+        Args: { _family_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_family_parent: {
+        Args: { _family_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_my_child_row: {
+        Args: { _child_id: string; _user_id: string }
+        Returns: boolean
+      }
+      task_child_id: { Args: { _task_id: string }; Returns: string }
+      task_family_id: { Args: { _task_id: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "parent" | "child" | "admin"
+      goal_status: "draft" | "active" | "completed" | "cancelled"
+      ledger_type: "earn" | "deduct" | "payout"
+      task_kind: "home" | "action"
+      task_status: "active" | "pending_approval" | "approved" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +856,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["parent", "child", "admin"],
+      goal_status: ["draft", "active", "completed", "cancelled"],
+      ledger_type: ["earn", "deduct", "payout"],
+      task_kind: ["home", "action"],
+      task_status: ["active", "pending_approval", "approved", "archived"],
+    },
   },
 } as const
