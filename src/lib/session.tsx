@@ -36,10 +36,10 @@ export function useMe(enabled: boolean) {
 
 /** Where a signed-in user belongs. */
 export function homePathFor(me: MyContext): string {
-  if (me.role === "admin") return "/admin";
-  if (me.role === "child") return "/child";
+  if (me.role === "child" || me.childId) return "/child";
   if (me.family && !me.family.approved) return "/join-family";
-  if (me.role === "parent" && me.family) return "/parent";
+  if (me.family) return "/parent";
+  if (me.role === "admin") return "/onboarding";
   return "/onboarding";
 }
 
@@ -75,8 +75,16 @@ export function RequireAuth({
       return;
     }
     if (!me) return;
-    const kind: Allowed = me.role ?? "newcomer";
-    if (!allow.includes(kind)) navigate({ to: homePathFor(me) });
+    const kind: Allowed = me.childId
+      ? "child"
+      : me.family
+        ? "parent"
+        : me.role === "admin"
+          ? "admin"
+          : (me.role ?? "newcomer");
+    if (!allow.includes(kind) && !(me.role === "admin" && allow.includes("parent") && me.family)) {
+      navigate({ to: homePathFor(me) });
+    }
   }, [loading, session, me, allow, navigate]);
 
   if (loading || !session) return <Spinner />;
