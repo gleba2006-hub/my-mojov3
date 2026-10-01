@@ -304,6 +304,7 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
   const [methodId, setMethodId] = useState<"tracks" | "classic" | "pocket_money">("tracks");
   const [pathIndex, setPathIndex] = useState(1);
   const [custom, setCustom] = useState("");
+  const [customKind, setCustomKind] = useState<"home" | "action">("action");
   const create = useMutation({
     mutationFn: () =>
       createGoal({
@@ -320,7 +321,7 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
     queryFn: () => getBoard({ data: { childId } }),
   });
   const extra = useMutation({
-    mutationFn: () => addCustomTask({ data: { goalId: board.data?.goals[0]?.id ?? "", title: custom, kind: "action", repeats: 1 } }),
+    mutationFn: () => addCustomTask({ data: { goalId: board.data?.goals[0]?.id ?? "", title: custom, kind: customKind, repeats: 1 } }),
     onSuccess: () => {
       setCustom("");
       qc.invalidateQueries({ queryKey: ["board"] });
@@ -472,6 +473,10 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
           }}
         >
           <h2 className="font-black">משימה ידנית למטרה הפעילה</h2>
+          <div className="grid grid-cols-2 gap-2">
+            <Button type="button" variant={customKind === "action" ? "default" : "outline"} onClick={() => setCustomKind("action")}>אקשן</Button>
+            <Button type="button" variant={customKind === "home" ? "default" : "outline"} onClick={() => setCustomKind("home")}>בית</Button>
+          </div>
           <Input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="שם המשימה" />
           <Button type="submit" variant="outline" disabled={extra.isPending || custom.trim().length < 2}>הוספה</Button>
         </form>

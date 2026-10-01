@@ -131,6 +131,7 @@ function ChildHome({ me }: { me: MyContext }) {
             ))}
           </div>
           {cheer ? <p className="surface-card p-4 text-center text-lg font-black">{cheer}</p> : null}
+          {done.error instanceof Error ? <p className="surface-card p-4 text-center text-sm font-bold">{done.error.message}</p> : null}
         </>
       ) : null}
       {data && tab === "tasks" ? (
@@ -200,7 +201,7 @@ function TaskList({
   busy,
 }: {
   title: string;
-  tasks: Array<{ id: string; title: string; kind: string; category: string | null; status?: string; advances_goal?: boolean }>;
+  tasks: Array<{ id: string; title: string; kind: string; category: string | null; status?: string; advances_goal?: boolean; repeat_done?: number; repeat_target?: number }>;
   action?: (id: string) => void;
   busy?: boolean;
 }) {
@@ -215,7 +216,7 @@ function TaskList({
               <img src={taskIcon(task.title)} alt="" className="h-12 w-12 object-contain" />
               <div>
                 <p className="font-bold">{task.title}</p>
-                <p className="text-xs text-muted-foreground">{task.kind === "action" ? "אקשן" : "בית"} · {task.advances_goal ? "סופר למתנה" : "רק נקודות"}</p>
+                <p className="text-xs text-muted-foreground">{task.kind === "action" ? "אקשן" : "בית"} · {task.advances_goal ? "סופר למתנה" : "רק נקודות"} · {task.repeat_done ?? 0}/{task.repeat_target ?? 1}</p>
               </div>
             </div>
             {action ? (
