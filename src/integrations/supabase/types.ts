@@ -692,37 +692,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_access_child: {
-        Args: { _child_id: string; _user_id: string }
-        Returns: boolean
-      }
-      can_manage_child: {
-        Args: { _child_id: string; _user_id: string }
-        Returns: boolean
-      }
-      child_family_id: { Args: { _child_id: string }; Returns: string }
-      goal_child_id: { Args: { _goal_id: string }; Returns: string }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      is_family_member: {
-        Args: { _family_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_family_parent: {
-        Args: { _family_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_my_child_row: {
-        Args: { _child_id: string; _user_id: string }
-        Returns: boolean
-      }
-      task_child_id: { Args: { _task_id: string }; Returns: string }
-      task_family_id: { Args: { _task_id: string }; Returns: string }
+      [_ in never]: never
     }
     Enums: {
       app_role: "parent" | "child" | "admin"
