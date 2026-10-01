@@ -206,6 +206,22 @@ export const addCustomTask = createServerFn({ method: "POST" })
     return { taskId: task.id };
   });
 
+export const cancelGoal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ goalId: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    const db = await admin();
+    const { data: goal } = await db.from("goals").select("id, child_id, status").eq("id", data.goalId).maybeSingle();
+    if (!goal) throw new Error("המטרה לא נמצאה");
+    if (goal.status !== "active") throw new Error("אפשר לבטל רק מטרה פעילה");
+    const { data: child } = await db.from("child_profiles").select("family_id").eq("id", goal.child_id).maybeSingle();
+    if (!child) throw new Error("הילד לא נמצא");
+    await assertParent(context.userId, child.family_id);
+    await db.from("goals").update({ status: "cancelled" }).eq("id", goal.id);
+    await db.from("tasks").update({ status: "archived" }).eq("goal_id", goal.id).eq("status", "active");
+    return { ok: true };
+  });
+
 export const requestPrize = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ goalId: z.string().uuid() }))

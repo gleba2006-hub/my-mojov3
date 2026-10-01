@@ -38,6 +38,7 @@ function ChildHome({ me }: { me: MyContext }) {
   const target = Number((goal?.method_config as { taskTarget?: number } | null)?.taskTarget ?? 0);
   const open = (data?.tasks ?? []).filter((t) => t.status === "active");
   const waiting = (data?.tasks ?? []).filter((t) => t.status === "pending_approval");
+  const closed = (data?.tasks ?? []).filter((t) => t.status === "approved");
 
   return (
     <AppFrame title={data?.child.name || "המשימות שלי"} kicker="לוח ילד" tab="home" onTab={() => undefined} onSignOut={() => signOut()} tabs={[{ id: "home", label: "הבית" }]}>
@@ -83,6 +84,7 @@ function ChildHome({ me }: { me: MyContext }) {
           ) : null}
           <TaskList title="לעשות היום" tasks={open} action={(id) => done.mutate(id)} busy={done.isPending} />
           <TaskList title="מחכה להורה" tasks={waiting} />
+          <TaskList title="נסגרו" tasks={closed} />
           {data.messages.length > 0 ? (
             <section className="surface-card p-4">
               <h2 className="mb-2 font-black">פתקים</h2>
@@ -108,7 +110,7 @@ function TaskList({
   busy,
 }: {
   title: string;
-  tasks: Array<{ id: string; title: string; kind: string; category: string | null }>;
+  tasks: Array<{ id: string; title: string; kind: string; category: string | null; status?: string }>;
   action?: (id: string) => void;
   busy?: boolean;
 }) {
@@ -127,6 +129,8 @@ function TaskList({
               <Button type="button" size="sm" disabled={busy} onClick={() => action(task.id)} className="tap-target">
                 סיימתי
               </Button>
+            ) : task.status === "approved" ? (
+              <span className="text-xs font-bold text-success-foreground">נסגר</span>
             ) : (
               <span className="text-xs font-bold text-muted-foreground">נעול</span>
             )}

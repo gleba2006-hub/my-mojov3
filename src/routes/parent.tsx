@@ -18,6 +18,7 @@ import {
   addCustomTask,
   approveTask,
   createGoal,
+  cancelGoal,
   deliverGoal,
   getBoard,
   listRanges,
@@ -46,6 +47,14 @@ function ParentGate() {
 function ParentHome({ me }: { me: MyContext }) {
   const [tab, setTab] = useState("home");
   const children = useQuery({ queryKey: ["children"], queryFn: () => listChildren() });
+  const pending = useQuery({
+    queryKey: ["approvals", (children.data ?? []).map((c) => c.id).join(",")],
+    enabled: (children.data ?? []).length > 0,
+    queryFn: async () => {
+      const all = await Promise.all((children.data ?? []).map(async (c) => getBoard({ data: { childId: c.id } })));
+      return all.reduce((n, board) => n + board.tasks.filter((t) => t.status === "pending_approval").length, 0);
+    },
+  });
   return (
     <AppFrame
       title={me.family?.name || "המשפחה"}
@@ -55,7 +64,7 @@ function ParentHome({ me }: { me: MyContext }) {
       onSignOut={() => signOut()}
       tabs={[
         { id: "home", label: "בית" },
-        { id: "approve", label: "אישורים" },
+        { id: "approve", label: "אישורים", ...(pending.data ? { badge: pending.data } : {}) },
         { id: "goal", label: "מטרה" },
         { id: "shop", label: "חנות" },
         { id: "family", label: "משפחה" },
@@ -108,6 +117,16 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
       ) : (
         <p className="mt-3 text-sm text-muted-foreground">אין מטרה פעילה</p>
       )}
+      {board.data?.ledger.length ? (
+        <ul className="mt-3 flex flex-col gap-1">
+          {board.data.ledger.slice(0, 3).map((row) => (
+            <li key={row.created_at} className="flex justify-between text-xs text-muted-foreground">
+              <span>{row.reason}</span>
+              <span>{row.type === "earn" ? "+" : "-"}{row.amount} ₪</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </article>
   );
 }
@@ -267,6 +286,9 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
         <Button type="submit" disabled={create.isPending || title.trim().length < 2} className="h-11 font-bold">
           {create.isPending ? "יוצרים…" : "פתיחת מטרה"}
         </Button>
+        {board.data?.goals.find((g) => g.status === "active") ? (
+          <CancelGoal goalId={board.data.goals.find((g) => g.status === "active")!.id} />
+        ) : null}
       </form>
 
       <section className="surface-card flex flex-col gap-3 p-4">
@@ -319,6 +341,19 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
         <Button type="submit" variant="secondary">שליחה</Button>
       </form>
     </div>
+  );
+}
+
+function CancelGoal({ goalId }: { goalId: string }) {
+  const qc = useQueryClient();
+  const cancel = useMutation({
+    mutationFn: () => cancelGoal({ data: { goalId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
+  });
+  return (
+    <Button type="button" variant="outline" disabled={cancel.isPending} onClick={() => cancel.mutate()}>
+      ביטול המטרה הפעילה
+    </Button>
   );
 }
 
