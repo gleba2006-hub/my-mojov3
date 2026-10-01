@@ -17,6 +17,8 @@ export type DemoKid = {
   xp: number;
   pet: string;
   balance: number;
+  coins: number;
+  streak: number;
   goal: { title: string; price: number; path: string; method: string; target: number; requested?: boolean };
   tasks: DemoTask[];
   notes: string[];
@@ -44,6 +46,8 @@ const kids: DemoKid[] = [
     xp: 340,
     pet: "מדוזה ורודה",
     balance: 27,
+    coins: 12,
+    streak: 2,
     goal: { title: "אופניים", price: 450, path: "צמיחה ויוזמה", method: "מסלולי אקשן", target: 6 },
     notes: ["נועה, אחרי הקהילה נשב על התקציב."],
     tasks: [
@@ -62,6 +66,8 @@ const kids: DemoKid[] = [
     xp: 160,
     pet: "עץ קטן",
     balance: 12,
+    coins: 6,
+    streak: 1,
     goal: { title: "לגו חלל", price: 280, path: "בית וקשרים", method: "כל משימה נחשבת", target: 4 },
     notes: ["איתי, החדר נספר הפעם."],
     tasks: [
@@ -148,6 +154,8 @@ export function demoDecide(taskId: string, approve: boolean) {
     task.status = task.repeat_done >= task.repeat_target ? "approved" : "active";
     kid.xp += 10;
     kid.level = Math.floor(kid.xp / 100) + 1;
+    kid.coins += 1;
+    kid.streak += 1;
     const earn = task.kind === "action" ? 5 : 2;
     kid.balance += earn;
     const current = read();

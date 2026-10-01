@@ -131,7 +131,8 @@ export function DemoChild() {
             <img src={characterSrc(kid.gender, stageFor(kid.level))} alt="" className="absolute inset-x-0 bottom-16 mx-auto h-[46dvh] w-auto object-contain drop-shadow-2xl" />
             <div className="absolute inset-x-4 top-0 flex justify-between">
               <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רמה {kid.level}</span>
-              <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">{kid.xp % 100}/100</span>
+              <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">רצף {kid.streak}</span>
+              <span className="rounded-full bg-card/80 px-3 py-1 text-sm font-black">{kid.coins} מטבעות</span>
             </div>
           </section>
           <Hero eyebrow={kid.goal.path} title={kid.goal.title} detail={`${done}/${kid.goal.target}`} progress={(done / kid.goal.target) * 100} />
@@ -146,7 +147,7 @@ export function DemoChild() {
       ) : null}
       {tab === "prize" ? (
         <section>
-          <p className="mb-2 text-3xl font-black">{coinsFromXp(kid.xp)} מטבעות</p>
+          <p className="mb-2 text-3xl font-black">{kid.coins} מטבעות</p>
           <ul className="grid grid-cols-2 gap-2">
             {shopItems.map((item) => (
               <li key={item.id} className="surface-card p-3 font-black">{item.title}<span className="block text-sm font-bold text-muted-foreground">{item.cost}</span></li>
