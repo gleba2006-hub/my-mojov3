@@ -154,9 +154,10 @@ function Approvals({ children }: { children: Array<{ id: string; name: string }>
     enabled: children.length > 0,
     queryFn: async () => {
       const all = await Promise.all(children.map(async (c) => ({ child: c, board: await getBoard({ data: { childId: c.id } }) })));
-      return all.flatMap(({ child, board }) =>
-        board.tasks.filter((t) => t.status === "pending_approval").map((t) => ({ ...t, childName: child.name })),
-      );
+      return all.flatMap(({ child, board }) => [
+        ...board.tasks.filter((t) => t.status === "pending_approval").map((t) => ({ ...t, childName: child.name, shop: false })),
+        ...board.messages.filter((m) => m.body.startsWith("בקשת חנות")).map((m) => ({ id: m.id, title: m.body, childName: child.name, kind: "home", repeat_done: 0, repeat_target: 1, shop: true })),
+      ]);
     },
   });
   const decide = useMutation({
@@ -177,12 +178,16 @@ function Approvals({ children }: { children: Array<{ id: string; name: string }>
             {task.childName} · {task.kind === "action" ? "אקשן" : "בית"} · {task.repeat_done}/{task.repeat_target}
           </p>
           <div className="mt-3 flex gap-2">
-            <Button type="button" className="tap-target" disabled={decide.isPending} onClick={() => decide.mutate({ taskId: task.id, approve: true })}>
-              אישור
-            </Button>
-            <Button type="button" variant="outline" className="tap-target" disabled={decide.isPending} onClick={() => decide.mutate({ taskId: task.id, approve: false })}>
-              החזרה
-            </Button>
+            {task.shop ? <p className="text-sm font-bold">מחכה להורה בחנות</p> : (
+              <>
+                <Button type="button" className="tap-target" disabled={decide.isPending} onClick={() => decide.mutate({ taskId: task.id, approve: true })}>
+                  אישור
+                </Button>
+                <Button type="button" variant="outline" className="tap-target" disabled={decide.isPending} onClick={() => decide.mutate({ taskId: task.id, approve: false })}>
+                  החזרה
+                </Button>
+              </>
+            )}
           </div>
         </li>
       ))}

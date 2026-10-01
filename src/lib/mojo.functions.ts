@@ -223,6 +223,23 @@ export const cancelGoal = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const requestShop = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ title: z.string().min(2).max(40), cost: z.number().int().positive() }))
+  .handler(async ({ data, context }) => {
+    const db = await admin();
+    const { data: me } = await db.from("child_profiles").select("id, family_id, name, xp").eq("user_id", context.userId).maybeSingle();
+    if (!me) throw new Error("רק ילד יכול לבקש מהחנות");
+    if (Math.floor(me.xp / 10) < data.cost) throw new Error("אין מספיק מטבעות");
+    await db.from("messages").insert({
+      family_id: me.family_id,
+      child_id: me.id,
+      body: `בקשת חנות: ${data.title} · ${data.cost} מטבעות`,
+      sender_user_id: context.userId,
+    });
+    return { ok: true };
+  });
+
 export const requestPrize = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ goalId: z.string().uuid() }))

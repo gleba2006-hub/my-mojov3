@@ -7,7 +7,8 @@ import { characterSrc, taskIcon } from "@/components/brand";
 import { Hero, Jar } from "@/components/mojo-ui";
 import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
-import { completeTask, getBoard, requestPrize } from "@/lib/mojo.functions";
+import { completeTask, getBoard, requestPrize, requestShop } from "@/lib/mojo.functions";
+import { coinsFromXp, shopItems } from "@/lib/shop";
 import { DemoChild } from "@/components/demo-boards";
 import { useDemo } from "@/lib/use-demo";
 import { RequireAuth, signOut } from "@/lib/session";
@@ -30,6 +31,10 @@ function ChildHome({ me }: { me: MyContext }) {
   const board = useQuery({ queryKey: ["board", me.childId], queryFn: () => getBoard({ data: {} }) });
   const done = useMutation({
     mutationFn: (taskId: string) => completeTask({ data: { taskId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
+  });
+  const buy = useMutation({
+    mutationFn: (item: { title: string; cost: number }) => requestShop({ data: item }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["board"] }),
   });
   const ask = useMutation({
@@ -70,7 +75,7 @@ function ChildHome({ me }: { me: MyContext }) {
                 <span className="rounded-full bg-foreground/50 px-3 py-1">רמה {data.child.level}</span>
                 <span className="rounded-full bg-foreground/50 px-3 py-1">{data.child.xp % 100}/100</span>
               </div>
-              <img src={characterSrc(data.child.gender, stageFor(data.child.level))} alt="" className="mx-auto h-48 w-auto object-contain" />
+              <img src={characterSrc(data.child.gender, stageFor(data.child.level))} alt="" className="mx-auto h-64 w-auto object-contain drop-shadow-xl" />
             </div>
             <LevelUp level={data.child.level} name={data.child.name} />
           </section>
@@ -81,6 +86,9 @@ function ChildHome({ me }: { me: MyContext }) {
               detail={`${approved}/${target || "צנצנת"}`}
               progress={target ? (approved / target) * 100 : 0}
             />
+          ) : null}
+          {goal?.status === "completed" && !(goal.method_config as { requested?: boolean }).requested ? (
+            <Button type="button" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש את המתנה</Button>
           ) : null}
           <TaskList title="מחכה לך היום" tasks={open.slice(0, 2)} action={(id) => done.mutate(id)} busy={done.isPending} />
         </>
@@ -93,21 +101,8 @@ function ChildHome({ me }: { me: MyContext }) {
         </>
       ) : null}
       {data && tab === "prize" ? (
-        goal ? (
-          <Hero
-            eyebrow={(goal.method_config as { pathName?: string }).pathName ?? "המתנה"}
-            title={goal.title}
-            detail={`${goal.method_id === "pocket_money" ? "דמי כיס" : goal.method_id === "classic" ? "כל משימה" : "מסלול אקשן"} · ${approved}/${target || "צנצנת"}`}
-            progress={target ? (approved / target) * 100 : 0}
-          />
-        ) : (
-          <p className="surface-card p-4 text-sm">ההורה עוד לא פתח מטרה.</p>
-        )
+        <ShopGrid coins={coinsFromXp(data.child.xp)} busy={buy.isPending} onBuy={(item) => buy.mutate(item)} note={buy.isSuccess ? "נשלח להורה" : null} />
       ) : null}
-      {data && tab === "prize" && goal?.status === "completed" && !(goal.method_config as { requested?: boolean }).requested ? (
-        <Button type="button" disabled={ask.isPending} onClick={() => ask.mutate(goal.id)}>לבקש מההורה</Button>
-      ) : null}
-      {data && tab === "prize" && (goal?.method_config as { requested?: boolean } | undefined)?.requested ? <p className="text-sm font-bold">ביקשת. מחכים להורה.</p> : null}
       {data && tab === "jar" ? (
         <>
           <Jar amount={data.balance} caption={data.allowance ? `בסיס ${data.allowance.base_amount} ₪ ${data.allowance.period === "weekly" ? "בשבוע" : "בחודש"}` : "עוד בלי דמי כיס"} />
@@ -125,6 +120,26 @@ function ChildHome({ me }: { me: MyContext }) {
         </>
       ) : null}
     </AppFrame>
+  );
+}
+
+function ShopGrid({ coins, busy, onBuy, note }: { coins: number; busy: boolean; onBuy: (item: { title: string; cost: number }) => void; note: string | null }) {
+  return (
+    <section className="flex flex-col gap-3">
+      <p className="text-3xl font-black">{coins} מטבעות</p>
+      {note ? <p className="text-sm font-bold">{note}</p> : null}
+      <ul className="grid grid-cols-2 gap-2">
+        {shopItems.map((item) => (
+          <li key={item.id} className="surface-card p-3">
+            <p className="font-black">{item.title}</p>
+            <p className="text-sm text-muted-foreground">{item.cost}</p>
+            <Button type="button" size="sm" className="mt-2" disabled={busy || coins < item.cost} onClick={() => onBuy(item)}>
+              {coins < item.cost ? `עוד ${item.cost - coins}` : "לבקש"}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

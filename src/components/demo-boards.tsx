@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
 import { taskIcon } from "@/components/brand";
+import { coinsFromXp, shopItems } from "@/lib/shop";
 import { Button } from "@/components/ui/button";
 import { Chip, ChipRow, Hero, Jar } from "@/components/mojo-ui";
 import {
@@ -115,12 +116,13 @@ export function DemoChild() {
         navigate({ to: "/login" });
       }}
       tabs={[
-        { id: "today", label: "היום" },
-        { id: "prize", label: "מתנה" },
-        { id: "jar", label: "צנצנת" },
+        { id: "today", label: "בית" },
+        { id: "tasks", label: "משימות" },
+        { id: "prize", label: "חנות" },
+        { id: "jar", label: "הודעות" },
       ]}
       background="/brand/room-1.png"
-      icons={{ today: "/brand/nav-home.png", prize: "/brand/nav-gifts.png", jar: "/brand/nav-chat.png" }}
+      icons={{ today: "/brand/nav-home.png", tasks: "/brand/nav-missions.png", prize: "/brand/nav-gifts.png", jar: "/brand/nav-chat.png" }}
     >
       <DemoSwitch />
       {tab === "today" ? (
@@ -133,12 +135,21 @@ export function DemoChild() {
           <TaskBlock title="מחכה להורה" tasks={waiting} locked />
         </>
       ) : null}
-      {tab === "prize" ? (
+      {tab === "tasks" ? (
         <>
-          <Hero eyebrow={kid.goal.path} title={kid.goal.title} detail={`${done}/${kid.goal.target} למתנה של ${kid.goal.price} ₪`} progress={(done / kid.goal.target) * 100} />
-          {done >= kid.goal.target && !kid.goal.requested ? <Button type="button" onClick={() => demoRequest(kid.id)}>לבקש מההורה</Button> : null}
-          {kid.goal.requested ? <p className="text-sm font-bold">ביקשת. מחכים להורה.</p> : null}
+          <TaskBlock title="היום" tasks={open} onDone={demoComplete} />
+          <TaskBlock title="מחכה להורה" tasks={waiting} locked />
         </>
+      ) : null}
+      {tab === "prize" ? (
+        <section>
+          <p className="mb-2 text-3xl font-black">{coinsFromXp(kid.xp)} מטבעות</p>
+          <ul className="grid grid-cols-2 gap-2">
+            {shopItems.map((item) => (
+              <li key={item.id} className="surface-card p-3 font-black">{item.title}<span className="block text-sm font-bold text-muted-foreground">{item.cost}</span></li>
+            ))}
+          </ul>
+        </section>
       ) : null}
       {tab === "jar" ? (
         <>
