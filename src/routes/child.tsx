@@ -57,6 +57,10 @@ function ChildHome({ me }: { me: MyContext }) {
   const goal = data?.goals.find((g) => g.status === "active") ?? data?.goals[0];
   const approved = (data?.tasks ?? []).filter((t) => t.advances_goal && t.status === "approved").length;
   const target = Number((goal?.method_config as { taskTarget?: number } | null)?.taskTarget ?? 0);
+  const pocket = goal?.method_id === "pocket_money";
+  const price = Number(goal?.price_ils ?? 0);
+  const progress = pocket ? (price ? ((data?.balance ?? 0) / price) * 100 : 0) : target ? (approved / target) * 100 : 0;
+  const detail = pocket ? `${data?.balance ?? 0}/${price} ₪ בצנצנת` : `${approved}/${target || "?"} משימות`;
   const open = (data?.tasks ?? []).filter((t) => t.status === "active");
   const waiting = (data?.tasks ?? []).filter((t) => t.status === "pending_approval");
   const closed = (data?.tasks ?? []).filter((t) => t.status === "approved");
@@ -93,8 +97,8 @@ function ChildHome({ me }: { me: MyContext }) {
             <Hero
               eyebrow={goal.method_id === "pocket_money" ? "דמי כיס" : goal.method_id === "classic" ? "כל משימה" : "מסלול אקשן"}
               title={goal.title}
-              detail={`${approved}/${target || "צנצנת"}`}
-              progress={target ? (approved / target) * 100 : 0}
+              detail={detail}
+              progress={progress}
             />
           ) : (
             <p className="surface-card p-4 text-center font-black">ההורים עוד בוחרים מתנה. אפשר כבר לסמן משימות.</p>

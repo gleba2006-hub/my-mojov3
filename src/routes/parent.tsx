@@ -83,7 +83,7 @@ function ParentHome({ me }: { me: MyContext }) {
               <p className="text-sm text-muted-foreground">אישור משימות ובקשות חנות</p>
             </button>
           ) : null}
-          <Kids children={children.data ?? []} />
+          <Kids children={children.data ?? []} onMore={() => setTab("more")} onGoal={() => setTab("goal")} />
         </>
       ) : null}
       {tab === "approve" ? <Approvals children={children.data ?? []} /> : null}
@@ -110,10 +110,23 @@ function ParentHome({ me }: { me: MyContext }) {
   );
 }
 
-function Kids({ children }: { children: Array<{ id: string; name: string; connected: boolean }> }) {
+function Kids({ children, onMore, onGoal }: { children: Array<{ id: string; name: string; connected: boolean }>; onMore: () => void; onGoal: () => void }) {
   const [id, setId] = useState(children[0]?.id ?? "");
   const current = children.find((c) => c.id === id) ?? children[0];
-  if (!current) return <Empty text="עוד אין ילדים. מוסיפים בטאב עוד." />;
+  if (!current) {
+    return (
+      <section className="surface-card p-5">
+        <p className="text-xs font-bold text-primary">התחלה</p>
+        <h2 className="mt-1 text-2xl font-black">שלושה צעדים, ואז הילד רואה מתנה</h2>
+        <ol className="mt-4 flex flex-col gap-2 text-sm font-bold">
+          <li>1. מוסיפים ילד או ילדה</li>
+          <li>2. בוחרים שיטת חינוך</li>
+          <li>3. פותחים מתנה</li>
+        </ol>
+        <Button type="button" className="mt-4 h-11 w-full font-black" onClick={onMore}>הוספת ילד</Button>
+      </section>
+    );
+  }
   return (
     <div className="flex flex-col gap-3">
       <ChipRow>
@@ -121,16 +134,21 @@ function Kids({ children }: { children: Array<{ id: string; name: string; connec
           <Chip key={child.id} label={child.name} on={child.id === current.id} onClick={() => setId(child.id)} />
         ))}
       </ChipRow>
-      <KidCard child={current} />
+      <KidCard child={current} onGoal={onGoal} />
     </div>
   );
 }
 
-function KidCard({ child }: { child: { id: string; name: string; connected: boolean } }) {
+function KidCard({ child, onGoal }: { child: { id: string; name: string; connected: boolean }; onGoal: () => void }) {
   const board = useQuery({ queryKey: ["board", child.id], queryFn: () => getBoard({ data: { childId: child.id } }) });
   const goal = board.data?.goals.find((g) => g.status === "active");
   const done = (board.data?.tasks ?? []).filter((t) => t.advances_goal && t.status === "approved").length;
   const target = Number((goal?.method_config as { taskTarget?: number } | null)?.taskTarget ?? 0);
+  const pocket = goal?.method_id === "pocket_money";
+  const price = Number(goal?.price_ils ?? 0);
+  const progress = pocket ? (price ? ((board.data?.balance ?? 0) / price) * 100 : 0) : target ? (done / target) * 100 : 0;
+  const methodName = pocket ? "דמי כיס" : goal?.method_id === "classic" ? "כל משימה" : goal ? "מסלול אקשן" : "בלי שיטה";
+  const detail = !goal ? "עוד אין מתנה" : pocket ? `${board.data?.balance ?? 0}/${price} ₪ בצנצנת` : `${done}/${target || "?"} משימות`;
   const open = (board.data?.tasks ?? []).filter((t) => t.status === "active").length;
   const waiting = (board.data?.tasks ?? []).filter((t) => t.status === "pending_approval").length;
   const stage = stageFor(board.data?.child.level ?? 1);
@@ -148,11 +166,12 @@ function KidCard({ child }: { child: { id: string; name: string; connected: bool
       </section>
       <Jar amount={board.data?.balance ?? 0} caption={child.connected ? "מכשיר מחובר" : "עוד בלי מכשיר"} />
       <Hero
-        eyebrow={(goal?.method_config as { pathName?: string } | undefined)?.pathName ?? "אין מטרה"}
-        title={goal?.title ?? "פותחים מטרה"}
-        detail={goal ? `${goal.method_id === "pocket_money" ? "דמי כיס" : goal.method_id === "classic" ? "כל משימה" : "מסלול"} · ${done}/${target || "?"}` : "בטאב מטרה"}
-        progress={target ? (done / target) * 100 : 0}
+        eyebrow={goal ? `${methodName} · ${(goal.method_config as { pathName?: string }).pathName ?? ""}` : "אין מתנה פעילה"}
+        title={goal?.title ?? "פותחים מתנה"}
+        detail={detail}
+        progress={progress}
       />
+      <Button type="button" className="h-11 font-black" onClick={onGoal}>{goal ? "עריכת שיטה ומתנה" : "בחירת שיטה ומתנה"}</Button>
       <section className="surface-card p-4">
         <XpMeter xp={board.data?.child.xp ?? 0} level={board.data?.child.level ?? 1} />
         <p className="mt-2 text-sm font-bold">{board.data?.coins ?? 0} מטבעות · רצף {board.data?.streak ?? 0}</p>
@@ -203,7 +222,7 @@ function Approvals({ children }: { children: Array<{ id: string; name: string }>
         <li key={task.id} className="surface-card p-4">
           <p className="font-black">{task.title}</p>
           <p className="text-sm text-muted-foreground">
-            {task.childName} · {task.kind === "action" ? "אקשן" : "בית"} · {task.repeat_done}/{task.repeat_target}
+            {task.childName} · {task.shop ? "חנות" : task.kind === "action" ? "אקשן מקדם מסלול" : "בית נותן נקודות"} · {task.repeat_done}/{task.repeat_target}
           </p>
           <div className="mt-3 flex gap-2">
             {task.shop ? (
@@ -301,20 +320,9 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
           create.mutate();
         }}
       >
-        <h2 className="text-lg font-black">מתנה חדשה</h2>
+        <h2 className="text-lg font-black">1. בוחרים שיטה</h2>
         <FormError message={create.error instanceof Error ? create.error.message : null} />
-        <Label htmlFor="kid">ילד/ה</Label>
-        <select id="kid" value={childId} onChange={(e) => setChildId(e.target.value)} className="h-11 rounded-xl border border-input bg-background px-3">
-          {children.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-        <Label htmlFor="gift">שם המתנה</Label>
-        <Input id="gift" value={title} onChange={(e) => setTitle(e.target.value)} required className="h-11" />
-        <Label htmlFor="price">מחיר בשקלים</Label>
-        <Input id="price" inputMode="decimal" dir="ltr" value={price} onChange={(e) => setPrice(e.target.value)} className="h-11" />
-        <p className="text-sm text-muted-foreground">{range ? `${range.label} · ${range.task_count} משימות` : "מחוץ לטווחים"}</p>
-        <h2 className="text-lg font-black">קודם בוחרים שיטה</h2>
+        {create.isSuccess ? <p className="rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold">המתנה נפתחה. הילד רואה אותה בלוח.</p> : null}
         <div className="flex flex-col gap-2">
           {methods.map((m) => (
             <button
@@ -325,13 +333,25 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
               className={`rounded-2xl border px-3 py-3 text-start ${methodId === m.id ? "border-primary bg-primary/10" : "border-border"}`}
             >
               <span className="block font-black">{m.name}</span>
-              <span className="mt-1 block text-sm text-muted-foreground">{m.description}</span>
+              <span className="mt-1 block text-sm text-muted-foreground">{m.tagline}</span>
             </button>
           ))}
         </div>
         <p className="text-sm font-bold">
           {methodId === "tracks" ? "רק משימות אקשן סופרות למתנה. בית נותן נקודות." : methodId === "classic" ? "כל משימה שאושרה מקרבת למתנה." : "המתנה נפתחת כשהצנצנת מגיעה למחיר. אין מסלול."}
         </p>
+        <h2 className="text-lg font-black">2. המתנה</h2>
+        <Label htmlFor="kid">ילד/ה</Label>
+        <select id="kid" value={childId} onChange={(e) => setChildId(e.target.value)} className="h-11 rounded-xl border border-input bg-background px-3">
+          {children.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+        <Label htmlFor="gift">שם המתנה</Label>
+        <Input id="gift" value={title} onChange={(e) => setTitle(e.target.value)} required className="h-11" />
+        <Label htmlFor="price">מחיר בשקלים</Label>
+        <Input id="price" inputMode="decimal" dir="ltr" value={price} onChange={(e) => setPrice(e.target.value)} className="h-11" />
+        <p className="text-sm text-muted-foreground">{methodId === "pocket_money" ? "המתנה נפתחת לפי יתרה, לא לפי מספר משימות." : range ? `${range.label} · ${range.task_count} משימות` : "מחוץ לטווחים"}</p>
         {methodId === "tracks" ? (
           <div className="grid grid-cols-1 gap-2">
             {paths.map((p) => (
@@ -349,8 +369,8 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
         ) : null}
       </form>
 
-      <section className="surface-card flex flex-col gap-3 p-4">
-        <h2 className="text-lg font-black">דמי כיס</h2>
+      {methodId === "pocket_money" ? <section className="surface-card flex flex-col gap-3 p-4">
+        <h2 className="text-lg font-black">3. כמה נכנס לצנצנת</h2>
         <p className="text-2xl font-black">{board.data?.balance ?? 0} ₪ בצנצנת</p>
         <div className="grid grid-cols-2 gap-2">
           <Input inputMode="decimal" dir="ltr" value={base} onChange={(e) => setBase(e.target.value)} aria-label="בסיס" />
@@ -367,7 +387,7 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
           <Button type="button" onClick={() => pay.mutate()} disabled={pay.isPending}>סמן כשולם</Button>
         </div>
         <FormError message={pay.error instanceof Error ? pay.error.message : null} />
-      </section>
+      </section> : <p className="text-sm font-bold text-muted-foreground">דמי כיס מופיעים רק בשיטת הצנצנת.</p>}
 
       {board.data?.goals[0] ? (
         <section className="surface-card p-4">
