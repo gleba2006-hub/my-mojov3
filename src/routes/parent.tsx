@@ -18,6 +18,7 @@ import {
   addCustomTask,
   approveTask,
   createGoal,
+  deliverGoal,
   getBoard,
   listRanges,
   markPaid,
@@ -54,12 +55,14 @@ function ParentHome({ me }: { me: MyContext }) {
         { id: "home", label: "בית" },
         { id: "approve", label: "אישורים" },
         { id: "goal", label: "מטרה" },
+        { id: "shop", label: "חנות" },
         { id: "family", label: "משפחה" },
       ]}
     >
       {tab === "home" ? <Kids children={children.data ?? []} /> : null}
       {tab === "approve" ? <Approvals children={children.data ?? []} /> : null}
       {tab === "goal" ? <GoalMaker children={children.data ?? []} /> : null}
+      {tab === "shop" ? <Shop children={children.data ?? []} /> : null}
       {tab === "family" ? <FamilyTab familyId={me.family!.id} children={children.data ?? []} /> : null}
     </AppFrame>
   );
@@ -289,6 +292,42 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
         <Button type="submit" variant="secondary">שליחה</Button>
       </form>
     </div>
+  );
+}
+
+function Shop({ children }: { children: Array<{ id: string; name: string }> }) {
+  const qc = useQueryClient();
+  const boards = useQuery({
+    queryKey: ["shop", children.map((c) => c.id).join(",")],
+    enabled: children.length > 0,
+    queryFn: () => Promise.all(children.map(async (c) => ({ child: c, board: await getBoard({ data: { childId: c.id } }) }))),
+  });
+  const give = useMutation({
+    mutationFn: (goalId: string) => deliverGoal({ data: { goalId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["shop"] }),
+  });
+  const rows = (boards.data ?? []).flatMap(({ child, board }) => board.goals.map((g) => ({ ...g, childName: child.name })));
+  if (rows.length === 0) return <Empty text="אין מתנות בחנות. פותחים מטרה בטאב מטרה." />;
+  return (
+    <ul className="flex flex-col gap-3">
+      {rows.map((goal) => {
+        const delivered = Boolean((goal.method_config as { delivered?: boolean }).delivered);
+        return (
+          <li key={goal.id} className="surface-card p-4">
+            <p className="font-black">{goal.title}</p>
+            <p className="text-sm text-muted-foreground">
+              {goal.childName} · {goal.price_ils ?? 0} ₪ · {goal.status === "completed" ? "הושגה" : "בדרך"}
+            </p>
+            {goal.status === "completed" && !delivered ? (
+              <Button type="button" className="mt-3" disabled={give.isPending} onClick={() => give.mutate(goal.id)}>
+                סמן כנמסר
+              </Button>
+            ) : null}
+            {delivered ? <p className="mt-2 text-sm font-bold text-success-foreground">נמסר</p> : null}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

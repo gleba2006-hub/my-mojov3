@@ -134,8 +134,23 @@ export const createGoal = createServerFn({ method: "POST" })
         repeat_target: 1,
         advances_goal: data.methodId === "classic" || (data.methodId === "tracks" && t.kind === "action"),
       }));
-    if (rows.length) {
-      const { data: inserted } = await db.from("tasks").insert(rows).select("id, title");
+    const { data: home } = await db.from("reward_tasks").select("id, title, category, kind").eq("kind", "home");
+    const homeRows = (home ?? []).map((t) => ({
+      family_id: child.family_id,
+      child_id: child.id,
+      goal_id: goal.id,
+      kind: t.kind,
+      title: t.title,
+      category: t.category,
+      xp_value: 10,
+      status: "active" as const,
+      created_by: context.userId,
+      repeat_target: 1,
+      advances_goal: data.methodId === "classic",
+    }));
+    const allRows = [...rows, ...homeRows];
+    if (allRows.length) {
+      const { data: inserted } = await db.from("tasks").insert(allRows).select("id, title");
       if (inserted?.length) {
         await db.from("sub_tasks").insert(
           inserted.map((t) => ({ task_id: t.id, title: t.title, needs_parent_approval: true })),
@@ -143,7 +158,7 @@ export const createGoal = createServerFn({ method: "POST" })
       }
     }
     await db.from("goal_progress").insert({ goal_id: goal.id, value: 0, note: "פתיחה" });
-    return { goalId: goal.id, pathName: path.name, taskCount: rows.length };
+    return { goalId: goal.id, pathName: path.name, taskCount: allRows.length };
   });
 
 export const addCustomTask = createServerFn({ method: "POST" })
@@ -189,6 +204,22 @@ export const addCustomTask = createServerFn({ method: "POST" })
     if (error || !task) throw new Error("לא הצלחנו להוסיף משימה");
     await db.from("sub_tasks").insert({ task_id: task.id, title: data.title, needs_parent_approval: true });
     return { taskId: task.id };
+  });
+
+export const deliverGoal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ goalId: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    const db = await admin();
+    const { data: goal } = await db.from("goals").select("id, child_id, status, method_config").eq("id", data.goalId).maybeSingle();
+    if (!goal) throw new Error("המטרה לא נמצאה");
+    const { data: child } = await db.from("child_profiles").select("family_id").eq("id", goal.child_id).maybeSingle();
+    if (!child) throw new Error("הילד לא נמצא");
+    await assertParent(context.userId, child.family_id);
+    if (goal.status !== "completed") throw new Error("המתנה עוד לא הושגה");
+    const config = { ...(goal.method_config as Record<string, unknown>), delivered: true };
+    await db.from("goals").update({ method_config: config }).eq("id", goal.id);
+    return { ok: true };
   });
 
 export const setRepeats = createServerFn({ method: "POST" })

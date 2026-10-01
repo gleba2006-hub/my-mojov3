@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame } from "@/components/app-frame";
 import { Button } from "@/components/ui/button";
-import { adminSnapshot, setMethodEnabled } from "@/lib/mojo.functions";
+import { adminSnapshot, listRanges, setMethodEnabled } from "@/lib/mojo.functions";
 import { RequireAuth, signOut } from "@/lib/session";
 
 export const Route = createFileRoute("/admin")({
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/admin")({
 function AdminHome() {
   const qc = useQueryClient();
   const snap = useQuery({ queryKey: ["admin"], queryFn: () => adminSnapshot() });
+  const ranges = useQuery({ queryKey: ["ranges"], queryFn: () => listRanges() });
   const toggle = useMutation({
     mutationFn: (v: { id: string; enabled: boolean }) => setMethodEnabled({ data: v }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin"] }),
@@ -48,6 +49,17 @@ function AdminHome() {
                   <Button type="button" size="sm" variant={m.enabled ? "outline" : "default"} disabled={toggle.isPending} onClick={() => toggle.mutate({ id: m.id, enabled: !m.enabled })}>
                     {m.enabled ? "פעילה" : "כבויה"}
                   </Button>
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section className="surface-card p-4">
+            <h2 className="mb-2 font-black">טווחי מחיר</h2>
+            <ul className="flex flex-col gap-2">
+              {(ranges.data?.ranges ?? []).map((range) => (
+                <li key={range.id} className="flex items-center justify-between text-sm">
+                  <span className="font-bold">{range.label}</span>
+                  <span className="text-muted-foreground">{range.task_count} משימות</span>
                 </li>
               ))}
             </ul>

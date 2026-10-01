@@ -52,6 +52,7 @@ export function DemoParent() {
             <p className="mt-3 text-sm font-bold">
               {kid.goal.title} ({kid.goal.price} ₪) · {done}/{kid.goal.target} · {kid.goal.path}
             </p>
+            <p className="mt-1 text-xs text-muted-foreground">{done >= kid.goal.target ? "המתנה בחנות, מוכנה למסירה" : "המתנה נעולה עד סוף המסלול"}</p>
             <Button
               type="button"
               className="mt-3 tap-target"

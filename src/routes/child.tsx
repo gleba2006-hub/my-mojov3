@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
+import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
 import { completeTask, getBoard } from "@/lib/mojo.functions";
 import { DemoChild } from "@/components/demo-boards";
@@ -43,6 +44,7 @@ function ChildHome({ me }: { me: MyContext }) {
             <div className="mt-3">
               <XpMeter xp={data.child.xp} level={data.child.level} />
             </div>
+            <LevelUp level={data.child.level} name={data.child.name} />
           </section>
           {goal ? (
             <section className="surface-card p-4">
