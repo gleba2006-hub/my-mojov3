@@ -24,6 +24,7 @@ export function DemoParent() {
   const kids = demoKids();
   const [tab, setTab] = useState("home");
   const [id, setId] = useState(demo?.childId ?? kids[0]!.id);
+  const [method, setMethod] = useState("מסלולי אקשן");
   const kid = demoKid(id);
   const done = kid.tasks.filter((t) => t.advances_goal && t.status === "approved").length;
   const waiting = kids.flatMap((child) =>
@@ -54,8 +55,13 @@ export function DemoParent() {
               <Chip key={child.id} label={child.name} on={child.id === kid.id} onClick={() => setId(child.id)} />
             ))}
           </ChipRow>
-          <Jar amount={kid.balance} caption={kid.pet} />
-          <Hero eyebrow={kid.goal.path} title={kid.goal.title} detail={`${done}/${kid.goal.target} · ${kid.goal.price} ₪`} progress={(done / kid.goal.target) * 100} />
+          <ChipRow>
+            {["מסלולי אקשן", "כל משימה נחשבת", "דמי כיס"].map((name) => (
+              <Chip key={name} label={name} on={method === name} onClick={() => setMethod(name)} />
+            ))}
+          </ChipRow>
+          <Jar amount={kid.balance} caption={method === "דמי כיס" ? "המתנה נפתחת כשהצנצנת מלאה" : kid.pet} />
+          <Hero eyebrow={method} title={kid.goal.title} detail={method === "דמי כיס" ? `${kid.balance}/${kid.goal.price} ₪` : `${done}/${kid.goal.target} · ${kid.goal.price} ₪`} progress={method === "דמי כיס" ? (kid.balance / kid.goal.price) * 100 : (done / kid.goal.target) * 100} />
           <section className="surface-card p-4">
             <XpMeter xp={kid.xp} level={kid.level} />
             <div className="mt-3"><AvatarPlate stage={stageFor(kid.level)} pet={kid.pet} gender={kid.gender} /></div>

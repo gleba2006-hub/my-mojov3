@@ -77,24 +77,24 @@ export const createGoal = createServerFn({ method: "POST" })
     );
     if (!range) throw new Error("לא נמצא טווח מחיר למתנה");
 
-    const { data: path } = await db
-      .from("reward_paths")
-      .select("id, name")
-      .eq("range_id", range.id)
-      .eq("path_index", data.pathIndex)
-      .maybeSingle();
-    if (!path) throw new Error("המסלול לא נמצא");
+    const pocket = data.methodId === "pocket_money";
+    const { data: path } = pocket
+      ? { data: null }
+      : await db
+          .from("reward_paths")
+          .select("id, name")
+          .eq("range_id", range.id)
+          .eq("path_index", data.pathIndex)
+          .maybeSingle();
+    if (!pocket && !path) throw new Error("המסלול לא נמצא");
 
-    const { data: links } = await db
-      .from("reward_path_tasks")
-      .select("task_id, sort_order")
-      .eq("path_id", path.id)
-      .order("sort_order");
+    const { data: links } = pocket
+      ? { data: [] }
+      : await db.from("reward_path_tasks").select("task_id, sort_order").eq("path_id", path!.id).order("sort_order");
     const ids = (links ?? []).map((l) => l.task_id);
-    const { data: catalog } = await db
-      .from("reward_tasks")
-      .select("id, title, category, kind")
-      .in("id", ids.length ? ids : ["none"]);
+    const { data: catalog } = ids.length
+      ? await db.from("reward_tasks").select("id, title, category, kind").in("id", ids)
+      : { data: [] };
 
     const { data: goal, error } = await db
       .from("goals")
@@ -107,10 +107,11 @@ export const createGoal = createServerFn({ method: "POST" })
         method_config: {
           rangeId: range.id,
           rangeLabel: range.label,
-          pathId: path.id,
-          pathName: path.name,
+          pathId: path?.id ?? null,
+          pathName: pocket ? "צנצנת" : path!.name,
           pathIndex: data.pathIndex,
-          taskTarget: range.task_count,
+          taskTarget: pocket ? 0 : range.task_count,
+          completeBy: pocket ? "balance" : "tasks",
         },
       })
       .select("id")
@@ -158,7 +159,7 @@ export const createGoal = createServerFn({ method: "POST" })
       }
     }
     await db.from("goal_progress").insert({ goal_id: goal.id, value: 0, note: "פתיחה" });
-    return { goalId: goal.id, pathName: path.name, taskCount: allRows.length };
+    return { goalId: goal.id, pathName: path?.name ?? "צנצנת", taskCount: allRows.length };
   });
 
 export const addCustomTask = createServerFn({ method: "POST" })
@@ -384,6 +385,16 @@ export const approveTask = createServerFn({ method: "POST" })
           reason: task.title,
           created_by: context.userId,
         });
+      }
+    }
+    if (task.goal_id) {
+      const { data: goal } = await db.from("goals").select("id, method_id, price_ils, status").eq("id", task.goal_id).maybeSingle();
+      if (goal?.method_id === "pocket_money" && goal.status === "active") {
+        const { data: ledger } = await db.from("money_ledger").select("amount, type").eq("child_id", task.child_id!);
+        const balance = (ledger ?? []).reduce((sum, row) => sum + (row.type === "earn" ? Number(row.amount) : -Number(row.amount)), 0);
+        if (balance >= Number(goal.price_ils ?? 0)) {
+          await db.from("goals").update({ status: "completed" }).eq("id", goal.id);
+        }
       }
     }
     return { ok: true, goalProgress };

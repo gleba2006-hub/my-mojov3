@@ -276,6 +276,7 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
         <Label htmlFor="price">מחיר בשקלים</Label>
         <Input id="price" inputMode="decimal" dir="ltr" value={price} onChange={(e) => setPrice(e.target.value)} className="h-11" />
         <p className="text-sm text-muted-foreground">{range ? `${range.label} · ${range.task_count} משימות` : "מחוץ לטווחים"}</p>
+        <h2 className="text-lg font-black">קודם בוחרים שיטה</h2>
         <div className="flex flex-col gap-2">
           {methods.map((m) => (
             <button
@@ -286,11 +287,14 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
               className={`rounded-2xl border px-3 py-3 text-start ${methodId === m.id ? "border-primary bg-primary/10" : "border-border"}`}
             >
               <span className="block font-black">{m.name}</span>
-              <span className="text-sm text-muted-foreground">{m.tagline}</span>
+              <span className="mt-1 block text-sm text-muted-foreground">{m.description}</span>
             </button>
           ))}
         </div>
-        {methodId !== "pocket_money" ? (
+        <p className="text-sm font-bold">
+          {methodId === "tracks" ? "רק משימות אקשן סופרות למתנה. בית נותן נקודות." : methodId === "classic" ? "כל משימה שאושרה מקרבת למתנה." : "המתנה נפתחת כשהצנצנת מגיעה למחיר. אין מסלול."}
+        </p>
+        {methodId === "tracks" ? (
           <div className="grid grid-cols-1 gap-2">
             {paths.map((p) => (
               <button key={p.id} type="button" aria-pressed={pathIndex === p.path_index} onClick={() => setPathIndex(p.path_index)} className={`rounded-2xl border px-3 py-2 text-sm font-bold ${pathIndex === p.path_index ? "border-accent bg-accent/15" : "border-border"}`}>

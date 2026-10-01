@@ -79,7 +79,7 @@ function ChildHome({ me }: { me: MyContext }) {
           <Hero
             eyebrow={(goal.method_config as { pathName?: string }).pathName ?? "המתנה"}
             title={goal.title}
-            detail={`${approved}/${target || "?"} משימות שסופרות`}
+            detail={`${goal.method_id === "pocket_money" ? "דמי כיס" : goal.method_id === "classic" ? "כל משימה" : "מסלול אקשן"} · ${approved}/${target || "צנצנת"}`}
             progress={target ? (approved / target) * 100 : 0}
           />
         ) : (
