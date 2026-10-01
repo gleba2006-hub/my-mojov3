@@ -2,32 +2,42 @@ import { useEffect, useState } from "react";
 
 export function LogoSplash({ onDone }: { onDone?: () => void }) {
   const [play, setPlay] = useState(true);
+  const [skip, setSkip] = useState(false);
+  function close() {
+    sessionStorage.setItem("mymojo-splash", "1");
+    setPlay(false);
+    onDone?.();
+  }
   useEffect(() => {
-    const seen = sessionStorage.getItem("mymojo-splash");
-    if (seen) {
-      setPlay(false);
-      onDone?.();
+    if (sessionStorage.getItem("mymojo-splash") || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      close();
       return;
     }
-    const timer = window.setTimeout(() => {
-      sessionStorage.setItem("mymojo-splash", "1");
-      setPlay(false);
-      onDone?.();
-    }, 2800);
-    return () => window.clearTimeout(timer);
+    const showSkip = window.setTimeout(() => setSkip(true), 1000);
+    const safety = window.setTimeout(close, 7000);
+    return () => {
+      window.clearTimeout(showSkip);
+      window.clearTimeout(safety);
+    };
   }, [onDone]);
   if (!play) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#fff7ef]" role="status" aria-label="MyMojo">
+    <div className="fixed inset-0 z-50 bg-foreground" role="status" aria-label="MyMojo">
       <video
-        className="h-40 w-40 object-contain"
+        className="h-[100dvh] w-full object-cover"
         src="/brand/logo-intro.mp4"
         autoPlay
         muted
         playsInline
-        onError={() => setPlay(false)}
+        preload="auto"
+        onEnded={close}
+        onError={close}
       />
-      <img src="/brand/logo.png" alt="" className="pointer-events-none absolute h-16 w-auto opacity-0" />
+      {skip ? (
+        <button type="button" onClick={close} className="tap-target absolute end-4 top-4 rounded-full bg-card/80 px-4 text-sm font-black">
+          דלג
+        </button>
+      ) : null}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppFrame, XpMeter, stageFor } from "@/components/app-frame";
 import { AvatarPlate } from "@/components/avatar-plate";
-import { taskIcon } from "@/components/brand";
+import { characterSrc, taskIcon } from "@/components/brand";
 import { Hero, Jar } from "@/components/mojo-ui";
 import { LevelUp } from "@/components/level-up";
 import { Button } from "@/components/ui/button";
@@ -52,26 +52,44 @@ function ChildHome({ me }: { me: MyContext }) {
       onTab={setTab}
       onSignOut={() => signOut()}
       background="/brand/room-1.png"
-      icons={{ today: "/brand/nav-home.png", prize: "/brand/nav-gifts.png", jar: "/brand/nav-chat.png" }}
+      icons={{ today: "/brand/nav-home.png", tasks: "/brand/nav-missions.png", prize: "/brand/nav-gifts.png", jar: "/brand/nav-chat.png" }}
       tabs={[
-        { id: "today", label: "היום" },
-        { id: "prize", label: "מתנה" },
-        { id: "jar", label: "צנצנת" },
+        { id: "today", label: "בית" },
+        { id: "tasks", label: "משימות" },
+        { id: "prize", label: "חנות" },
+        { id: "jar", label: "הודעות" },
       ]}
     >
       {!data ? <p className="text-center text-sm text-muted-foreground">טוענים את הלוח…</p> : null}
       {data && tab === "today" ? (
         <>
-          <section className="surface-card p-4">
-            <XpMeter xp={data.child.xp} level={data.child.level} />
-            <div className="mt-3">
-              <AvatarPlate stage={stageFor(data.child.level)} gender={data.child.gender} />
+          <section className="relative min-h-[52dvh] overflow-hidden rounded-[28px]">
+            <img src="/brand/room-1.png" alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="relative flex h-full flex-col justify-between p-4">
+              <div className="flex justify-between text-sm font-black text-primary-foreground">
+                <span className="rounded-full bg-foreground/50 px-3 py-1">רמה {data.child.level}</span>
+                <span className="rounded-full bg-foreground/50 px-3 py-1">{data.child.xp % 100}/100</span>
+              </div>
+              <img src={characterSrc(data.child.gender, stageFor(data.child.level))} alt="" className="mx-auto h-48 w-auto object-contain" />
             </div>
             <LevelUp level={data.child.level} name={data.child.name} />
           </section>
-          <TaskList title="לעשות היום" tasks={open} action={(id) => done.mutate(id)} busy={done.isPending} />
+          {goal ? (
+            <Hero
+              eyebrow={goal.method_id === "pocket_money" ? "דמי כיס" : goal.method_id === "classic" ? "כל משימה" : "מסלול אקשן"}
+              title={goal.title}
+              detail={`${approved}/${target || "צנצנת"}`}
+              progress={target ? (approved / target) * 100 : 0}
+            />
+          ) : null}
+          <TaskList title="מחכה לך היום" tasks={open.slice(0, 2)} action={(id) => done.mutate(id)} busy={done.isPending} />
+        </>
+      ) : null}
+      {data && tab === "tasks" ? (
+        <>
+          <TaskList title="היום" tasks={open} action={(id) => done.mutate(id)} busy={done.isPending} />
           <TaskList title="מחכה להורה" tasks={waiting} />
-          {open.length === 0 && waiting.length === 0 ? <p className="surface-card p-4 text-sm">אין משימות פתוחות.</p> : null}
+          <TaskList title="נסגרו" tasks={closed} />
         </>
       ) : null}
       {data && tab === "prize" ? (
