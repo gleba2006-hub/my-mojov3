@@ -81,7 +81,8 @@ function ChildHome({ me }: { me: MyContext }) {
         { id: "jar", label: "צנצנת" },
       ]}
     >
-      {!data ? <p className="text-center text-sm text-muted-foreground">טוענים את הלוח…</p> : null}
+      {board.isError ? <p className="surface-card p-4 text-center font-black">{board.error instanceof Error ? board.error.message : "הלוח לא נטען"}</p> : null}
+      {!data && !board.isError ? <p className="text-center text-sm text-muted-foreground">טוענים את הלוח…</p> : null}
       {data && tab === "today" ? (
         <>
           <section className="relative -mx-4 min-h-[68dvh]">
@@ -118,6 +119,7 @@ function ChildHome({ me }: { me: MyContext }) {
             <p className="surface-card p-4 text-center font-black">המתנה נמסרה. אפשר לפתוח מתנה חדשה.</p>
           ) : null}
           <TaskList title="מחכה לך היום" tasks={open.slice(0, 2)} action={(id) => done.mutate(id)} busy={done.isPending} />
+          {waiting.length ? <p className="text-center text-sm font-bold">{waiting.length} אצל ההורה לאישור</p> : null}
           <div className="flex gap-2 overflow-x-auto">
             {pets.map((p) => (
               <button key={p.id} type="button" className="shrink-0" onClick={() => pet.mutate(p.id)}>

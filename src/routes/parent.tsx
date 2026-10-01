@@ -205,6 +205,7 @@ function KidCard({ child, onGoal }: { child: { id: string; name: string; connect
   const waiting = (board.data?.tasks ?? []).filter((t) => t.status === "pending_approval").length;
   const stage = stageFor(board.data?.child.level ?? 1);
   const face = characters.find((c) => c.id === board.data?.child.avatar_id)?.src ?? characterSrc(board.data?.child.gender, stage);
+  if (board.isError) return <Empty text={board.error instanceof Error ? board.error.message : "לא הצלחנו לטעון את הלוח"} />;
   return (
     <div className="flex flex-col gap-3">
       <section className="surface-card flex items-center gap-3 p-4">
@@ -451,7 +452,7 @@ function GoalMaker({ children }: { children: Array<{ id: string; name: string }>
           <Button type="button" onClick={() => basePay.mutate()} disabled={basePay.isPending}>הפקד בסיס</Button>
           <Button type="button" onClick={() => pay.mutate()} disabled={pay.isPending}>סמן כשולם</Button>
         </div>
-        <FormError message={pay.error instanceof Error ? pay.error.message : null} />
+        <FormError message={pay.error instanceof Error ? pay.error.message : basePay.error instanceof Error ? basePay.error.message : null} />
       </section> : <p className="text-sm font-bold text-muted-foreground">דמי כיס מופיעים רק בשיטת הצנצנת.</p>}
 
       {board.data?.goals[0] ? (
