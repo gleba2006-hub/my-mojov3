@@ -94,15 +94,17 @@ function ChildHome({ me }: { me: MyContext }) {
             <LevelUp level={data.child.level} name={data.child.name} />
           </section>
           {goal ? (
-            <Hero
-              eyebrow={goal.method_id === "pocket_money" ? "דמי כיס" : goal.method_id === "classic" ? "כל משימה" : "מסלול אקשן"}
-              title={goal.title}
-              detail={detail}
-              progress={progress}
-            />
-            <p className="text-sm font-bold">
-              {goal.method_id === "pocket_money" ? "המתנה נפתחת כשהצנצנת מלאה. משימות ממלאות אותה בשקלים." : goal.method_id === "classic" ? "כל משימה שאושרה מקרבת למתנה." : "רק אקשן מקרב למתנה. בית נותן נקודות."}
-            </p>
+            <>
+              <Hero
+                eyebrow={goal.method_id === "pocket_money" ? "דמי כיס" : goal.method_id === "classic" ? "כל משימה" : "מסלול אקשן"}
+                title={goal.title}
+                detail={detail}
+                progress={progress}
+              />
+              <p className="text-sm font-bold">
+                {goal.method_id === "pocket_money" ? "המתנה נפתחת כשהצנצנת מלאה. משימות ממלאות אותה בשקלים." : goal.method_id === "classic" ? "כל משימה שאושרה מקרבת למתנה." : "רק אקשן מקרב למתנה. בית נותן נקודות."}
+              </p>
+            </>
           ) : (
             <p className="surface-card p-4 text-center font-black">ההורים עוד בוחרים מתנה. אפשר כבר לסמן משימות.</p>
           )}
