@@ -25,6 +25,12 @@ export type DemoKid = {
 const listeners = new Set<() => void>();
 
 function emit() {
+  // New snapshot object so subscribers re-render after in-place kid mutations.
+  if (session) {
+    session = { ...session };
+    lastRaw = typeof window !== "undefined" ? JSON.stringify(session) : null;
+    if (typeof window !== "undefined") sessionStorage.setItem("mymojo-demo", lastRaw!);
+  }
   listeners.forEach((fn) => fn());
 }
 
@@ -74,10 +80,14 @@ const kids: DemoKid[] = [
 type Session = { view: "parent" | "child"; childId: string; chest: string | null };
 
 let session: Session | null = null;
+let lastRaw: string | null = null;
 
+/** Returns a stable snapshot: same object until the stored string changes. */
 function read() {
   if (typeof window === "undefined") return session;
   const raw = sessionStorage.getItem("mymojo-demo");
+  if (raw === lastRaw) return session;
+  lastRaw = raw;
   if (!raw) return (session = null);
   try {
     session = JSON.parse(raw) as Session;

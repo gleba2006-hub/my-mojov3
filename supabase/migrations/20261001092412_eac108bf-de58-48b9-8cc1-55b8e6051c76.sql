@@ -1,17 +1,7 @@
--- Stage 2: auth, family setup, child connection, second parent.
---
--- Security fix: family_members / families could be inserted by any signed-in
--- user for themselves (self-insert), which let anyone add themselves as an
--- approved parent of ANY family. Families and memberships are now created only
--- by server functions running with the service role, after validation.
-
 DROP POLICY IF EXISTS "family_members_insert" ON public.family_members;
 DROP POLICY IF EXISTS "families_insert_own" ON public.families;
 REVOKE INSERT ON public.family_members FROM authenticated;
 REVOKE INSERT ON public.families FROM authenticated;
-
--- Brute-force protection for code redemption (child link codes, family invite
--- codes). Only the service role touches this table.
 CREATE TABLE public.code_attempts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   bucket TEXT NOT NULL,
@@ -19,6 +9,6 @@ CREATE TABLE public.code_attempts (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_code_attempts_lookup ON public.code_attempts (bucket, key_hash, created_at DESC);
-ALTER TABLE public.code_attempts ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.code_attempts FROM PUBLIC, anon, authenticated;
 GRANT ALL ON public.code_attempts TO service_role;
+ALTER TABLE public.code_attempts ENABLE ROW LEVEL SECURITY;

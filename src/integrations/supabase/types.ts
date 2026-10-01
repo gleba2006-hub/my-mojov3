@@ -79,6 +79,44 @@ export type Database = {
         }
         Relationships: []
       }
+      child_allowances: {
+        Row: {
+          action_amount: number
+          base_amount: number
+          child_id: string
+          home_amount: number
+          payout_day: number
+          period: string
+          updated_at: string
+        }
+        Insert: {
+          action_amount?: number
+          base_amount?: number
+          child_id: string
+          home_amount?: number
+          payout_day?: number
+          period?: string
+          updated_at?: string
+        }
+        Update: {
+          action_amount?: number
+          base_amount?: number
+          child_id?: string
+          home_amount?: number
+          payout_day?: number
+          period?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_allowances_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: true
+            referencedRelation: "child_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       child_profiles: {
         Row: {
           avatar_id: string | null
@@ -153,6 +191,24 @@ export type Database = {
           created_at?: string
           id?: string
           key_hash?: string
+        }
+        Relationships: []
+      }
+      content_categories: {
+        Row: {
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          id: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          name?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -536,6 +592,116 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_path_tasks: {
+        Row: {
+          path_id: string
+          sort_order: number
+          task_id: string
+        }
+        Insert: {
+          path_id: string
+          sort_order: number
+          task_id: string
+        }
+        Update: {
+          path_id?: string
+          sort_order?: number
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_path_tasks_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "reward_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_path_tasks_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "reward_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reward_paths: {
+        Row: {
+          id: string
+          name: string
+          path_index: number
+          range_id: string
+        }
+        Insert: {
+          id: string
+          name: string
+          path_index: number
+          range_id: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          path_index?: number
+          range_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_paths_range_id_fkey"
+            columns: ["range_id"]
+            isOneToOne: false
+            referencedRelation: "reward_price_ranges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reward_price_ranges: {
+        Row: {
+          id: string
+          label: string
+          max_ils: number | null
+          min_ils: number
+          sort_order: number
+          task_count: number
+        }
+        Insert: {
+          id: string
+          label: string
+          max_ils?: number | null
+          min_ils: number
+          sort_order: number
+          task_count: number
+        }
+        Update: {
+          id?: string
+          label?: string
+          max_ils?: number | null
+          min_ils?: number
+          sort_order?: number
+          task_count?: number
+        }
+        Relationships: []
+      }
+      reward_tasks: {
+        Row: {
+          category: string
+          id: string
+          kind: Database["public"]["Enums"]["task_kind"]
+          title: string
+        }
+        Insert: {
+          category: string
+          id: string
+          kind: Database["public"]["Enums"]["task_kind"]
+          title: string
+        }
+        Update: {
+          category?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["task_kind"]
+          title?: string
+        }
+        Relationships: []
+      }
       sub_tasks: {
         Row: {
           approved_at: string | null
@@ -632,58 +798,58 @@ export type Database = {
       }
       tasks: {
         Row: {
+          advances_goal: boolean
+          category: string | null
           child_id: string | null
           created_at: string
           created_by: string | null
           family_id: string
+          goal_id: string | null
           icon: string | null
           id: string
           kind: Database["public"]["Enums"]["task_kind"]
+          repeat_done: number
+          repeat_target: number
           status: Database["public"]["Enums"]["task_status"]
           title: string
           updated_at: string
           xp_value: number
-          goal_id: string | null
-          category: string | null
-          repeat_target: number
-          repeat_done: number
-          advances_goal: boolean
         }
         Insert: {
+          advances_goal?: boolean
+          category?: string | null
           child_id?: string | null
           created_at?: string
           created_by?: string | null
           family_id: string
+          goal_id?: string | null
           icon?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["task_kind"]
+          repeat_done?: number
+          repeat_target?: number
           status?: Database["public"]["Enums"]["task_status"]
           title: string
           updated_at?: string
           xp_value?: number
-          goal_id?: string | null
-          category?: string | null
-          repeat_target?: number
-          repeat_done?: number
-          advances_goal?: boolean
         }
         Update: {
+          advances_goal?: boolean
+          category?: string | null
           child_id?: string | null
           created_at?: string
           created_by?: string | null
           family_id?: string
+          goal_id?: string | null
           icon?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["task_kind"]
+          repeat_done?: number
+          repeat_target?: number
           status?: Database["public"]["Enums"]["task_status"]
           title?: string
           updated_at?: string
           xp_value?: number
-          goal_id?: string | null
-          category?: string | null
-          repeat_target?: number
-          repeat_done?: number
-          advances_goal?: boolean
         }
         Relationships: [
           {
@@ -700,38 +866,14 @@ export type Database = {
             referencedRelation: "families"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tasks_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
         ]
-      }
-
-      child_allowances: {
-        Row: { child_id: string; period: string; base_amount: number; payout_day: number; home_amount: number; action_amount: number; updated_at: string }
-        Insert: { child_id: string; period?: string; base_amount?: number; payout_day?: number; home_amount?: number; action_amount?: number; updated_at?: string }
-        Update: { child_id?: string; period?: string; base_amount?: number; payout_day?: number; home_amount?: number; action_amount?: number; updated_at?: string }
-        Relationships: []
-      }
-      reward_price_ranges: {
-        Row: { id: string; label: string; min_ils: number; max_ils: number | null; task_count: number; sort_order: number }
-        Insert: { id: string; label: string; min_ils: number; max_ils?: number | null; task_count: number; sort_order?: number }
-        Update: { id?: string; label?: string; min_ils?: number; max_ils?: number | null; task_count?: number; sort_order?: number }
-        Relationships: []
-      }
-      reward_paths: {
-        Row: { id: string; range_id: string; path_index: number; name: string }
-        Insert: { id: string; range_id: string; path_index: number; name: string }
-        Update: { id?: string; range_id?: string; path_index?: number; name?: string }
-        Relationships: []
-      }
-      reward_path_tasks: {
-        Row: { path_id: string; task_id: string; sort_order: number }
-        Insert: { path_id: string; task_id: string; sort_order: number }
-        Update: { path_id?: string; task_id?: string; sort_order?: number }
-        Relationships: []
-      }
-      reward_tasks: {
-        Row: { id: string; title: string; category: string; kind: Database["public"]["Enums"]["task_kind"] }
-        Insert: { id: string; title: string; category: string; kind: Database["public"]["Enums"]["task_kind"] }
-        Update: { id?: string; title?: string; category?: string; kind?: Database["public"]["Enums"]["task_kind"] }
-        Relationships: []
       }
       user_roles: {
         Row: {
