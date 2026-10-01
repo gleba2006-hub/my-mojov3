@@ -529,6 +529,17 @@ function FamilyTab({
   }
   return (
     <div className="flex flex-col gap-4">
+      <form
+        className="surface-card flex flex-col gap-2 p-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          add.mutate();
+        }}
+      >
+        <h2 className="font-black">ילד/ה חדש/ה</h2>
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="שם" />
+        <Button type="submit" disabled={add.isPending || name.trim().length < 2}>הוספה וחיבור מכשיר</Button>
+      </form>
       <ul className="flex flex-col gap-2">
         {children.map((c) => (
           <li key={c.id} className="surface-card flex items-center justify-between px-4 py-3">
