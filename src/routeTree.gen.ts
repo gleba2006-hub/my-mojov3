@@ -18,7 +18,6 @@ import { Route as JoinRouteImport } from './routes/join'
 import { Route as JoinFamilyRouteImport } from './routes/join-family'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as ParentRouteImport } from './routes/parent'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 
@@ -67,11 +66,6 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ParentRoute = ParentRouteImport.update({
-  id: '/parent',
-  path: '/parent',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -93,7 +87,6 @@ export interface FileRoutesByFullPath {
   '/join-family': typeof JoinFamilyRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
-  '/parent': typeof ParentRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
 }
@@ -107,7 +100,6 @@ export interface FileRoutesByTo {
   '/join-family': typeof JoinFamilyRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
-  '/parent': typeof ParentRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
 }
@@ -122,7 +114,6 @@ export interface FileRoutesById {
   '/join-family': typeof JoinFamilyRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
-  '/parent': typeof ParentRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
 }
@@ -138,7 +129,6 @@ export interface FileRouteTypes {
     | '/join-family'
     | '/login'
     | '/onboarding'
-    | '/parent'
     | '/register'
     | '/reset-password'
   fileRoutesByTo: FileRoutesByTo
@@ -152,7 +142,6 @@ export interface FileRouteTypes {
     | '/join-family'
     | '/login'
     | '/onboarding'
-    | '/parent'
     | '/register'
     | '/reset-password'
   id:
@@ -166,7 +155,6 @@ export interface FileRouteTypes {
     | '/join-family'
     | '/login'
     | '/onboarding'
-    | '/parent'
     | '/register'
     | '/reset-password'
   fileRoutesById: FileRoutesById
@@ -181,7 +169,6 @@ export interface RootRouteChildren {
   JoinFamilyRoute: typeof JoinFamilyRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
-  ParentRoute: typeof ParentRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
@@ -251,13 +238,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/parent': {
-      id: '/parent'
-      path: '/parent'
-      fullPath: '/parent'
-      preLoaderRoute: typeof ParentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -285,7 +265,6 @@ const rootRouteChildren: RootRouteChildren = {
   JoinFamilyRoute: JoinFamilyRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
-  ParentRoute: ParentRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
 }
