@@ -1,42 +1,54 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { LogoMark, LogoSplash } from "@/components/brand";
+import { LogoSplash } from "@/components/brand";
 import { endDemo } from "@/lib/demo";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MyMojo — משימות, נקודות ומתנות" },
-      { name: "description", content: "הילד עושה משימות, ההורה מאשר, והמתנה מתקרבת." },
+      { title: "MyMojo — משימות שמתקרבות מתנה" },
+      { name: "description", content: "הורים פותחים מתנה, ילדים משלימים משימות, והמתנה מתקרבת." },
     ],
   }),
   component: Index,
 });
+
+const methods = [
+  { title: "מסלול אקשן", text: "רק משימות ההרפתקה סופרות למתנה. בית נותן נקודות." },
+  { title: "כל משימה", text: "כל משימה שאושרה מקדמת את המתנה. בלי מסלול." },
+  { title: "דמי כיס", text: "כל משימה ממלאת את הצנצנת. כשהסכום מגיע — המתנה שלו." },
+];
 
 function Index() {
   useEffect(() => {
     endDemo();
   }, []);
   return (
-    <main className="safe-pad min-h-[100dvh] bg-[#fff6ea]">
+    <main className="safe-pad min-h-[100dvh] bg-[#fff4e8] text-[#4a3028]">
       <LogoSplash />
-      <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-5 pb-10 pt-8">
-        <header className="text-center">
-          <img src="/brand/logo.png" alt="" className="mx-auto h-28 w-28 object-contain drop-shadow-md" />
-          <LogoMark className="mx-auto mt-3 h-10" />
-          <h1 className="mt-4 text-4xl font-black leading-none text-[#c4512c]">MyMojo</h1>
-          <p className="mt-3 text-lg font-bold leading-snug text-[#5c3b2e]">הילד עושה משימות.<br />אתם מאשרים. המתנה מתקרבת.</p>
+      <div className="mx-auto flex w-full max-w-md flex-col px-4 pb-10 pt-4">
+        <img src="/brand/room-1.png" alt="" className="h-52 w-full rounded-[28px] object-cover object-[center_40%] shadow-lg" />
+        <header className="mt-5 text-center">
+          <img src="/brand/logo.png" alt="MyMojo" className="mx-auto h-20 w-20 object-contain" />
+          <h1 className="mt-2 text-4xl font-black text-[#c4512c]">MyMojo</h1>
+          <p className="mt-2 text-base font-bold leading-snug">משימות של הילד מתקרבות מתנה שאתם פותחים.</p>
         </header>
-        <nav aria-label="כניסה" className="mt-8 flex flex-col gap-3">
-          <Link to="/register" className="tap-target flex items-center justify-center rounded-full bg-[#e86a45] px-4 text-lg font-black text-white shadow-[0_8px_0_#c4512c]">פתיחת משפחה</Link>
-          <Link to="/login" className="tap-target flex items-center justify-center rounded-full bg-white px-4 text-lg font-black text-[#5c3b2e]">כניסה</Link>
-          <Link to="/join" className="tap-target text-center text-sm font-black text-[#c4512c]">ילד/ה? חיבור עם קוד</Link>
+        <nav aria-label="כניסה" className="mt-5 flex flex-col gap-3">
+          <Link to="/register" className="flex h-14 items-center justify-center rounded-full bg-[#e86a45] text-lg font-black text-white shadow-[0_6px_0_#c4512c]">פתיחת משפחה</Link>
+          <Link to="/login" className="flex h-14 items-center justify-center rounded-full bg-white text-lg font-black">כניסה</Link>
+          <Link to="/join" className="text-center text-sm font-black text-[#c4512c]">ילד/ה? חיבור עם קוד</Link>
         </nav>
-        <ul className="mt-8 grid grid-cols-3 gap-2 text-center text-xs font-black text-[#5c3b2e]">
-          <li className="rounded-2xl bg-white/80 px-2 py-3">מסלול אקשן</li>
-          <li className="rounded-2xl bg-white/80 px-2 py-3">כל משימה</li>
-          <li className="rounded-2xl bg-white/80 px-2 py-3">דמי כיס</li>
-        </ul>
+        <section className="mt-6" aria-label="שלוש שיטות">
+          <h2 className="mb-2 text-sm font-black text-[#c4512c]">איך זה עובד</h2>
+          <ul className="flex flex-col gap-2">
+            {methods.map((m) => (
+              <li key={m.title} className="rounded-2xl bg-white/90 px-4 py-3">
+                <p className="font-black">{m.title}</p>
+                <p className="text-sm leading-snug">{m.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </main>
   );
